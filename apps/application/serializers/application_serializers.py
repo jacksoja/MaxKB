@@ -117,7 +117,7 @@ def valid_model_params_setting(model_id, model_params_setting):
 
 
 class DatasetSettingSerializer(serializers.Serializer):
-    top_n = serializers.FloatField(required=True, max_value=100, min_value=1,
+    top_n = serializers.FloatField(required=True, max_value=10000, min_value=1,
                                    error_messages=ErrMessage.float(_("Reference segment number")))
     similarity = serializers.FloatField(required=True, max_value=1, min_value=0,
                                         error_messages=ErrMessage.float(_("Acquaintance")))
@@ -142,10 +142,12 @@ class ModelSettingSerializer(serializers.Serializer):
                                                  error_messages=ErrMessage.char(_("No citation segmentation prompt")))
     reasoning_content_enable = serializers.BooleanField(required=False,
                                                         error_messages=ErrMessage.char(_("Thinking process switch")))
-    reasoning_content_start = serializers.CharField(required=False, allow_null=True, allow_blank=True, max_length=256,
+    reasoning_content_start = serializers.CharField(required=False, allow_null=True, default="<think>",
+                                                    allow_blank=True, max_length=256,
                                                     error_messages=ErrMessage.char(
                                                         _("The thinking process begins to mark")))
-    reasoning_content_end = serializers.CharField(required=False, allow_null=True, allow_blank=True, max_length=256,
+    reasoning_content_end = serializers.CharField(required=False, allow_null=True, allow_blank=True, default="</think>",
+                                                  max_length=256,
                                                   error_messages=ErrMessage.char(_("End of thinking process marker")))
 
 
@@ -579,7 +581,7 @@ class ApplicationSerializer(serializers.Serializer):
         id = serializers.CharField(required=True, error_messages=ErrMessage.uuid(_("Application ID")))
         user_id = serializers.UUIDField(required=False, error_messages=ErrMessage.uuid(_("User ID")))
         query_text = serializers.CharField(required=True, error_messages=ErrMessage.char(_("Query text")))
-        top_number = serializers.IntegerField(required=True, max_value=100, min_value=1,
+        top_number = serializers.IntegerField(required=True, max_value=10000, min_value=1,
                                               error_messages=ErrMessage.integer(_("topN")))
         similarity = serializers.FloatField(required=True, max_value=2, min_value=0,
                                             error_messages=ErrMessage.float(_("Relevance")))

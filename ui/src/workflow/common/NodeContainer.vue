@@ -135,6 +135,7 @@
       :close-on-press-escape="false"
       :destroy-on-close="true"
       append-to-body
+      @submit.prevent
     >
       <el-form label-position="top" ref="titleFormRef" :model="form">
         <el-form-item
@@ -272,7 +273,7 @@ const copyNode = () => {
 }
 const deleteNode = () => {
   MsgConfirm(t('common.tip'), t('views.applicationWorkflow.delete.confirmTitle'), {
-    confirmButtonText: t('common.delete'),
+    confirmButtonText: t('common.confirm'),
     confirmButtonClass: 'danger'
   }).then(() => {
     props.nodeModel.graphModel.deleteNode(props.nodeModel.id)

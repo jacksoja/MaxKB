@@ -181,11 +181,11 @@
             v-if="!startRecorderTime && !recorderLoading"
             text
             class="sent-button"
-            :disabled="isDisabledChart || loading"
+            :disabled="isDisabledChat || loading"
             @click="sendChatHandle"
           >
-            <img v-show="isDisabledChart || loading" src="@/assets/icon_send.svg" alt="" />
-            <SendIcon v-show="!isDisabledChart && !loading" />
+            <img v-show="isDisabledChat || loading" src="@/assets/icon_send.svg" alt="" />
+            <SendIcon v-show="!isDisabledChat && !loading" />
           </el-button>
         </div>
       </div>
@@ -395,7 +395,7 @@ const showDelete = ref('')
 
 // 定义响应式引用
 const mediaRecorder = ref<any>(null)
-const isDisabledChart = computed(
+const isDisabledChat = computed(
   () => !(inputValue.value.trim() && (props.appId || props.applicationDetails?.name))
 )
 
@@ -529,15 +529,25 @@ function sendChatHandle(event?: any) {
   if (!event?.ctrlKey) {
     // 如果没有按下组合键ctrl，则会阻止默认事件
     event?.preventDefault()
-    if (!isDisabledChart.value && !props.loading && !event?.isComposing) {
+    if (!isDisabledChat.value && !props.loading && !event?.isComposing) {
       if (inputValue.value.trim()) {
         autoSendMessage()
       }
     }
   } else {
     // 如果同时按下ctrl+回车键，则会换行
-    inputValue.value += '\n'
+    insertNewlineAtCursor()
   }
+}
+const insertNewlineAtCursor = () => {
+  const textarea = document.querySelector('.el-textarea__inner') as HTMLTextAreaElement
+  const startPos = textarea.selectionStart
+  const endPos = textarea.selectionEnd
+  // 在光标处插入换行符
+  inputValue.value = inputValue.value.slice(0, startPos) + '\n' + inputValue.value.slice(endPos)
+  nextTick(() => {
+    textarea.setSelectionRange(startPos + 1, startPos + 1) // 光标定位到换行后位置
+  })
 }
 
 function deleteFile(index: number, val: string) {

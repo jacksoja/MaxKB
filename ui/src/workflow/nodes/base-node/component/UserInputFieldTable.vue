@@ -1,6 +1,6 @@
 <template>
   <div class="flex-between mb-16">
-    <h5 class="lighter">{{ $t('chat.userInput') }}</h5>
+    <h5 class="lighter">{{ inputFieldConfig.title }}</h5>
     <div>
       <el-button type="primary" link @click="openChangeTitleDialog">
         <el-icon>
@@ -168,7 +168,7 @@ function refreshFieldTitle(data: any) {
   inputFieldConfig.value = data
   UserInputTitleDialogRef.value.close()
 
-  console.log('inputFieldConfig', inputFieldConfig.value)
+  // console.log('inputFieldConfig', inputFieldConfig.value)
 }
 
 const getDefaultValue = (row: any) => {
@@ -245,6 +245,9 @@ onMounted(() => {
     }
   })
   set(props.nodeModel.properties, 'user_input_field_list', inputFieldList)
+  if (props.nodeModel.properties.user_input_config) {
+    inputFieldConfig.value = props.nodeModel.properties.user_input_config
+  }
   set(props.nodeModel.properties, 'user_input_config', inputFieldConfig)
   onDragHandle()
 })

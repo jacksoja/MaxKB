@@ -64,12 +64,7 @@
           :storeKey="storeKey"
         >
           <el-table-column type="selection" width="55" :reserve-selection="true" />
-          <el-table-column
-            prop="name"
-            :label="$t('views.document.table.name')"
-            min-width="280"
-            sortable
-          >
+          <el-table-column prop="name" :label="$t('views.document.table.name')" min-width="280">
             <template #default="{ row }">
               <ReadWrite
                 @change="editName($event, row.id)"
@@ -250,12 +245,7 @@
               {{ $t(hitHandlingMethod[row.hit_handling_method as keyof typeof hitHandlingMethod]) }}
             </template>
           </el-table-column>
-          <el-table-column
-            prop="create_time"
-            :label="$t('common.createTime')"
-            width="175"
-            sortable
-          >
+          <el-table-column prop="create_time" :label="$t('common.createTime')" width="175" sortable>
             <template #default="{ row }">
               {{ datetimeFormat(row.create_time) }}
             </template>
@@ -450,7 +440,7 @@
       <SyncWebDialog ref="SyncWebDialogRef" @refresh="refresh" />
       <!-- 选择知识库 -->
       <SelectDatasetDialog ref="SelectDatasetDialogRef" @refresh="refreshMigrate" />
-      <GenerateRelatedDialog ref="GenerateRelatedDialogRef" @refresh="refresh" />
+      <GenerateRelatedDialog ref="GenerateRelatedDialogRef" @refresh="getList" />
     </div>
     <div class="mul-operation w-full flex" v-if="multipleSelection.length !== 0">
       <el-button :disabled="multipleSelection.length === 0" @click="cancelTaskHandle(1)">
@@ -723,7 +713,7 @@ function deleteMulDocument() {
     `${t('views.document.delete.confirmTitle1')} ${multipleSelection.value.length} ${t('views.document.delete.confirmTitle2')}`,
     t('views.document.delete.confirmMessage'),
     {
-      confirmButtonText: t('common.delete'),
+      confirmButtonText: t('common.confirm'),
       confirmButtonClass: 'danger'
     }
   )
@@ -759,7 +749,7 @@ function deleteDocument(row: any) {
     `${t('views.document.delete.confirmTitle3')} ${row.name} ?`,
     `${t('views.document.delete.confirmMessage1')} ${row.paragraph_count} ${t('views.document.delete.confirmMessage2')}`,
     {
-      confirmButtonText: t('common.delete'),
+      confirmButtonText: t('common.confirm'),
       confirmButtonClass: 'danger'
     }
   )
@@ -829,7 +819,7 @@ function getList(bool?: boolean) {
   const param = {
     ...(filterText.value && { name: filterText.value }),
     ...filterMethod.value,
-    order_by: orderBy.value,
+    order_by: orderBy.value
   }
   documentApi
     .getDocument(id as string, paginationConfig.value, param, bool ? undefined : loading)
