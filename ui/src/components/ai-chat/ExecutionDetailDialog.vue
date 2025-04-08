@@ -639,6 +639,40 @@
                       </div>
                     </div>
                   </template>
+
+                  <!-- MCP 节点 -->
+                  <template v-if="item.type === WorkflowType.McpNode">
+                    <div class="card-never border-r-4">
+                      <h5 class="p-8-12">
+                        {{ $t('views.applicationWorkflow.nodes.mcpNode.tool') }}
+                      </h5>
+                      <div class="p-8-12 border-t-dashed lighter">
+                        <div class="mb-8">
+                          <span class="color-secondary"> {{ $t('views.applicationWorkflow.nodes.mcpNode.tool') }}: </span> {{ item.mcp_tool }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-never border-r-4">
+                      <h5 class="p-8-12">
+                        {{ $t('views.applicationWorkflow.nodes.mcpNode.toolParam') }}
+                      </h5>
+                      <div class="p-8-12 border-t-dashed lighter">
+                        <div v-for="(value, name) in item.tool_params" :key="name" class="mb-8">
+                          <span class="color-secondary">{{ name }}:</span> {{ value }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-never border-r-4">
+                      <h5 class="p-8-12">
+                        {{ $t('common.param.outputParam') }}
+                      </h5>
+                      <div class="p-8-12 border-t-dashed lighter">
+                        <div v-for="(f, i) in item.result" :key="i" class="mb-8">
+                          <span class="color-secondary">result:</span> {{ f }}
+                        </div>
+                      </div>
+                    </div>
+                  </template>
                 </template>
                 <template v-else>
                   <div class="card-never border-r-4">
@@ -686,14 +720,9 @@ defineExpose({ open })
 </script>
 <style lang="scss">
 .execution-details-dialog {
-  padding: 0;
 
   .el-dialog__header {
-    padding: 24px 24px 0 24px;
-  }
-
-  .el-dialog__body {
-    padding: 8px !important;
+    padding-bottom: 16px;
   }
 
   .execution-details {

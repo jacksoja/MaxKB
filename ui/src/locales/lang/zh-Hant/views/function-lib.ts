@@ -1,5 +1,7 @@
 export default {
   title: '函數庫',
+  internalTitle: '內置函數',
+  added: '已新增',
   createFunction: '建立函數',
   editFunction: '編輯函數',
   copyFunction: '複製函數',
@@ -28,7 +30,8 @@ export default {
     },
     form: {
       functionName: {
-        label: '函數名稱',
+        label: '名稱',
+        name: '函數名稱',
         placeholder: '請輸入函數名稱',
         requiredMessage: '請輸入函數名稱'
       },
@@ -61,7 +64,7 @@ export default {
         paramInfo2: '使用函數時不顯示',
         code: '函数内容（Python）',
         selectPlaceholder: '請选择參數',
-        inputPlaceholder: '請輸入參數值',
+        inputPlaceholder: '請輸入參數值'
       },
       debug: {
         run: '運行',

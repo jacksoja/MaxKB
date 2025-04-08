@@ -1,12 +1,19 @@
 <template>
   <div class="item-content mb-16 lighter">
+    
     <template v-for="(answer_text, index) in answer_text_list" :key="index">
-      <div class="avatar">
-        <img v-if="application.avatar" :src="application.avatar" height="32px" width="32px" />
-        <LogoIcon v-else height="32px" width="32px" />
+      <div class="avatar mr-8" v-if="application.show_avatar">
+        <img v-if="application.avatar" :src="application.avatar" height="28px" width="28px" />
+        <LogoIcon v-else height="28px" width="28px" />
       </div>
-      <div class="content" @mouseup="openControl">
-        <el-card shadow="always" class="mb-8 border-r-8">
+      <div
+        class="content"
+        @mouseup="openControl"
+        :style="{
+          'padding-right': application.show_user_avatar ? 'var(--padding-left)' : '0'
+        }"
+      >
+        <el-card shadow="always" class="mb-8 border-r-8" style="--el-card-padding: 6px 16px">
           <MdRenderer
             v-if="
               (chatRecord.write_ed === undefined || chatRecord.write_ed === true) &&
@@ -27,20 +34,28 @@
               :send-message="chatMessage"
             ></MdRenderer>
           </template>
-          <span v-else-if="chatRecord.is_stop" shadow="always">
+          <p v-else-if="chatRecord.is_stop" shadow="always" style="margin: 0.5rem 0">
             {{ $t('chat.tip.stopAnswer') }}
-          </span>
-          <span v-else shadow="always">
+          </p>
+          <p v-else shadow="always" style="margin: 0.5rem 0">
             {{ $t('chat.tip.answerLoading') }} <span class="dotting"></span>
-          </span>
+          </p>
           <!-- 知识来源 -->
-          <div v-if="showSource(chatRecord) && index === chatRecord.answer_text_list.length - 1">
-            <KnowledgeSource :data="chatRecord" :type="application.type" />
-          </div>
+          <KnowledgeSource
+            :data="chatRecord"
+            :type="application.type"
+            v-if="showSource(chatRecord) && index === chatRecord.answer_text_list.length - 1"
+          />
         </el-card>
       </div>
     </template>
-    <div class="content">
+    <div
+      class="content"
+      :style="{
+        'padding-left': application.show_avatar ? 'var(--padding-left)' : '0',
+        'padding-right': application.show_user_avatar ? 'var(--padding-left)' : '0'
+      }"
+    >
       <OperationButton
         :type="type"
         :application="application"

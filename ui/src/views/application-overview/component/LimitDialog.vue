@@ -4,6 +4,7 @@
     v-model="dialogVisible"
     :close-on-click-modal="false"
     :close-on-press-escape="false"
+    width="650"
   >
     <el-form label-position="top" ref="limitFormRef" :model="form">
       <!-- <el-form-item
@@ -186,7 +187,7 @@ function firstGeneration() {
 
 defineExpose({ open })
 </script>
-<style lang="scss" scope>
+<style lang="scss" scoped>
 .authentication-append-input {
   .el-input-group__append {
     padding: 0 !important;

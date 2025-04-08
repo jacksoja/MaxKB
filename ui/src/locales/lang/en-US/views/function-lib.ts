@@ -1,5 +1,7 @@
 export default {
   title: 'Function',
+  internalTitle: 'Internal Function',
+  added: 'Added',
   createFunction: 'Create Function',
   editFunction: 'Edit Function',
   copyFunction: 'Copy Function',
@@ -31,6 +33,7 @@ export default {
     form: {
       functionName: {
         label: 'Name',
+        name: 'Function Name',
         placeholder: 'Please enter the function name',
         requiredMessage: 'Please enter the function name'
       },

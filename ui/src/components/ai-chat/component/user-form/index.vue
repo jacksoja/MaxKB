@@ -4,25 +4,25 @@
       (inputFieldList.length > 0 || (type === 'debug-ai-chat' && apiInputFieldList.length > 0)) &&
       type !== 'log'
     "
-    class="mb-16"
-    style="padding: 0 24px"
+    class="user-form-container mb-16 w-full"
   >
     <el-card shadow="always" class="border-r-8" style="--el-card-padding: 16px 8px">
-      <div
-        class="flex align-center cursor w-full"
-        style="padding: 0 8px"
-        @click="showUserInput = !showUserInput"
-      >
-        <el-icon class="mr-8 arrow-icon" :class="showUserInput ? 'rotate-90' : ''"
+      <div class="flex align-center cursor w-full" style="padding: 0 8px">
+        <!-- <el-icon class="mr-8 arrow-icon" :class="showUserInput ? 'rotate-90' : ''"
           ><CaretRight
-        /></el-icon>
+        /></el-icon> -->
         <span class="break-all ellipsis-1 mr-16" :title="inputFieldConfig.title">
-        {{ inputFieldConfig.title }}
+          {{ inputFieldConfig.title }}
         </span>
       </div>
-      <el-scrollbar max-height="160">
+
+      <el-scrollbar :max-height="first ? 0 : 450">
         <el-collapse-transition>
-          <div v-show="showUserInput" class="mt-16" style="padding: 0 8px">
+          <div
+            v-show="showUserInput"
+            class="mt-16"
+            style="padding: 0 8px; height: calc(100% - 100px)"
+          >
             <DynamicsForm
               :key="dynamicsFormRefresh"
               v-model="form_data_context"
@@ -44,6 +44,16 @@
           </div>
         </el-collapse-transition>
       </el-scrollbar>
+
+      <div class="text-right mr-8">
+        <el-button type="primary" v-if="first" @click="confirmHandle">{{
+          $t('chat.operation.startChat')
+        }}</el-button>
+        <el-button v-if="!first" @click="cancelHandle">{{ $t('common.cancel') }}</el-button>
+        <el-button type="primary" v-if="!first" @click="confirmHandle">{{
+          $t('common.confirm')
+        }}</el-button>
+      </div>
     </el-card>
   </div>
 </template>
@@ -55,11 +65,15 @@ import { useRoute } from 'vue-router'
 import { MsgWarning } from '@/utils/message'
 import { t } from '@/locales'
 const route = useRoute()
+const {
+  params: { accessToken }
+} = route
 const props = defineProps<{
   application: any
   type: 'log' | 'ai-chat' | 'debug-ai-chat'
   api_form_data: any
   form_data: any
+  first: boolean
 }>()
 // 用于刷新动态表单
 const dynamicsFormRefresh = ref(0)
@@ -67,7 +81,12 @@ const inputFieldList = ref<FormField[]>([])
 const apiInputFieldList = ref<FormField[]>([])
 const inputFieldConfig = ref({ title: t('chat.userInput') })
 const showUserInput = ref(true)
-const emit = defineEmits(['update:api_form_data', 'update:form_data'])
+const firstMounted = ref(false)
+
+const dynamicsFormRef = ref<InstanceType<typeof DynamicsForm>>()
+const dynamicsFormRef2 = ref<InstanceType<typeof DynamicsForm>>()
+
+const emit = defineEmits(['update:api_form_data', 'update:form_data', 'confirm', 'cancel'])
 
 const api_form_data_context = computed({
   get: () => {
@@ -89,7 +108,7 @@ const form_data_context = computed({
 
 watch(
   () => props.application,
-  () => {
+  (data) => {
     handleInputFieldList()
   }
 )
@@ -270,6 +289,25 @@ function handleInputFieldList() {
         : { title: t('chat.userInput') }
     })
 }
+const getRouteQueryValue = (field: string) => {
+  let _value = route.query[field]
+  if (_value != null) {
+    if (_value instanceof Array) {
+      _value = _value
+        .map((item) => {
+          if (item != null) {
+            return decodeQuery(item)
+          }
+          return null
+        })
+        .filter((item) => item != null)
+    } else {
+      _value = decodeQuery(_value)
+    }
+    return _value
+  }
+  return null
+}
 /**
  * 校验参数
  */
@@ -278,7 +316,9 @@ const checkInputParam = () => {
   for (let i = 0; i < inputFieldList.value.length; i++) {
     if (
       inputFieldList.value[i].required &&
-      !form_data_context.value[inputFieldList.value[i].field]
+      (form_data_context.value[inputFieldList.value[i].field] === null ||
+        form_data_context.value[inputFieldList.value[i].field] === undefined ||
+        form_data_context.value[inputFieldList.value[i].field] === '')
     ) {
       MsgWarning(t('chat.tip.requiredMessage'))
       return false
@@ -287,28 +327,11 @@ const checkInputParam = () => {
   // 浏览器query参数找到接口传参
   let msg = []
   for (let f of apiInputFieldList.value) {
-    if (!api_form_data_context.value[f.field]) {
-      let _value = route.query[f.field]
-      if (_value != null) {
-        if (_value instanceof Array) {
-          _value = _value
-            .map((item) => {
-              if (item != null) {
-                return decodeQuery(item)
-              }
-              return null
-            })
-            .filter((item) => item != null)
-        } else {
-          _value = decodeQuery(_value)
-        }
-        api_form_data_context.value[f.field] = _value
-      }
-    }
     if (f.required && !api_form_data_context.value[f.field]) {
       msg.push(f.field)
     }
   }
+
   if (msg.length > 0) {
     MsgWarning(
       `${t('chat.tip.inputParamMessage1')} ${msg.join('、')}${t('chat.tip.inputParamMessage2')}`
@@ -317,6 +340,22 @@ const checkInputParam = () => {
   }
   return true
 }
+const initRouteQueryValue = () => {
+  for (let f of apiInputFieldList.value) {
+    if (!api_form_data_context.value[f.field]) {
+      let _value = getRouteQueryValue(f.field)
+      if (_value != null) {
+        api_form_data_context.value[f.field] = _value
+      }
+    }
+  }
+  if (!api_form_data_context.value['asker']) {
+    const asker = getRouteQueryValue('asker')
+    if (asker) {
+      api_form_data_context.value['asker'] = getRouteQueryValue('asker')
+    }
+  }
+}
 const decodeQuery = (query: string) => {
   try {
     return decodeURIComponent(query)
@@ -324,9 +363,40 @@ const decodeQuery = (query: string) => {
     return query
   }
 }
-defineExpose({ checkInputParam })
+const confirmHandle = () => {
+  if (checkInputParam()) {
+    localStorage.setItem(`${accessToken}userForm`, JSON.stringify(form_data_context.value))
+    emit('confirm')
+  }
+}
+const cancelHandle = () => {
+  emit('cancel')
+}
+const render = (data: any) => {
+  if (dynamicsFormRef.value) {
+    dynamicsFormRef.value?.render(inputFieldList.value, data)
+  }
+}
+
+const renderDebugAiChat = (data: any) => {
+  if (dynamicsFormRef2.value) {
+    dynamicsFormRef2.value?.render(apiInputFieldList.value, data)
+  }
+}
+defineExpose({ checkInputParam, render, renderDebugAiChat })
 onMounted(() => {
+  firstMounted.value = true
   handleInputFieldList()
+  initRouteQueryValue()
 })
 </script>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.user-form-container {
+  padding: 0 24px;
+}
+@media only screen and (max-width: 768px) {
+  .user-form-container {
+    max-width: 100%;
+  }
+}
+</style>

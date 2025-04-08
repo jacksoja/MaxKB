@@ -35,6 +35,8 @@
             v-model="form.model_id"
             :placeholder="$t('views.application.applicationForm.form.aiModel.placeholder')"
             :options="modelOptions"
+            showFooter
+            :model-type="'LLM'"
           ></ModelSelect>
         </el-form-item>
         <el-form-item
@@ -48,14 +50,16 @@
             type="textarea"
           />
         </el-form-item>
-        <el-form-item v-if="apiType === 'document'" :label="$t('components.selectParagraph.title')" prop="state">
+        <el-form-item
+          v-if="['document', 'dataset'].includes(apiType)"
+          :label="$t('components.selectParagraph.title')"
+          prop="state"
+        >
           <el-radio-group v-model="state" class="radio-block">
             <el-radio value="error" size="large">{{
               $t('components.selectParagraph.error')
             }}</el-radio>
-            <el-radio value="all" size="large">{{
-               $t('components.selectParagraph.all')
-            }}</el-radio>
+            <el-radio value="all" size="large">{{ $t('components.selectParagraph.all') }}</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -103,6 +107,7 @@ const stateMap = {
   error: ['0', '1', '3', '4', '5', 'n']
 }
 const FormRef = ref()
+const datasetId = ref<string>()
 const userId = user.userInfo?.id as string
 const form = ref(prompt.get(userId))
 const rules = reactive({
@@ -129,7 +134,8 @@ watch(dialogVisible, (bool) => {
   }
 })
 
-const open = (ids: string[], type: string) => {
+const open = (ids: string[], type: string, _datasetId?: string) => {
+  datasetId.value = _datasetId
   getModel()
   idList.value = ids
   apiType.value = type
@@ -147,7 +153,7 @@ const submitHandle = async (formEl: FormInstance) => {
       if (apiType.value === 'paragraph') {
         const data = {
           ...form.value,
-          paragraph_id_list: idList.value,
+          paragraph_id_list: idList.value
         }
         paragraphApi.batchGenerateRelated(id, documentId, data, loading).then(() => {
           MsgSuccess(t('views.document.generateQuestion.successMessage'))
@@ -165,6 +171,15 @@ const submitHandle = async (formEl: FormInstance) => {
           emit('refresh')
           dialogVisible.value = false
         })
+      } else if (apiType.value === 'dataset') {
+        const data = {
+          ...form.value,
+          state_list: stateMap[state.value]
+        }
+        datasetApi.generateRelated(id ? id : datasetId.value, data, loading).then(() => {
+          MsgSuccess(t('views.document.generateQuestion.successMessage'))
+          dialogVisible.value = false
+        })
       }
     }
   })
@@ -173,7 +188,7 @@ const submitHandle = async (formEl: FormInstance) => {
 function getModel() {
   loading.value = true
   datasetApi
-    .getDatasetModel(id)
+    .getDatasetModel(id ? id : datasetId.value)
     .then((res: any) => {
       modelOptions.value = groupBy(res?.data, 'provider')
       loading.value = false
@@ -185,9 +200,4 @@ function getModel() {
 
 defineExpose({ open })
 </script>
-<style lang="scss" scope>
-.update-info {
-  background: #d6e2ff;
-  line-height: 25px;
-}
-</style>
+<style lang="scss" scoped></style>

@@ -22,7 +22,7 @@ export default {
     copyParam: '复制参数',
     debug: '调试',
     exit: '直接退出',
-    exitSave: '保存并退出',
+    exitSave: '保存并退出'
   },
   tip: {
     publicSuccess: '发布成功',
@@ -37,7 +37,7 @@ export default {
     cannotCopy: '不能被复制',
     copyError: '已复制节点',
     paramErrorMessage: '参数已存在: ',
-    saveMessage: '当前的更改尚未保存，是否保存后退出?',
+    saveMessage: '当前的更改尚未保存，是否保存后退出?'
   },
   delete: {
     confirmTitle: '确定删除该节点？',
@@ -220,6 +220,17 @@ export default {
       text: '更新全局变量的值',
       assign: '赋值'
     },
+    mcpNode: {
+      label: 'MCP 调用',
+      text: '通过SSE方式执行MCP服务中的工具',
+      getToolsSuccess: '获取工具成功',
+      getTool: '获取工具',
+      tool: '工具',
+      toolParam: '工具参数',
+      mcpServerTip: '请输入JSON格式的MCP服务器配置',
+      mcpToolTip: '请选择工具',
+      configLabel: 'MCP Server Config (仅支持SSE调用方式)'
+    },
     imageGenerateNode: {
       label: '图片生成',
       text: '根据提供的文本内容生成图片',
@@ -281,7 +292,9 @@ export default {
     len_ge: '长度大于等于',
     len_gt: '长度大于',
     len_le: '长度小于等于',
-    len_lt: '长度小于'
+    len_lt: '长度小于',
+    is_true: '为真',
+    is_not_true: '不为真'
   },
   FileUploadSetting: {}
 }

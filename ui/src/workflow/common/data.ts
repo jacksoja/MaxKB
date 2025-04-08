@@ -263,6 +263,24 @@ export const variableAssignNode = {
   }
 }
 
+export const mcpNode = {
+  type: WorkflowType.McpNode,
+  text: t('views.applicationWorkflow.nodes.mcpNode.text'),
+  label: t('views.applicationWorkflow.nodes.mcpNode.label'),
+  height: 252,
+  properties: {
+    stepName: t('views.applicationWorkflow.nodes.mcpNode.label'),
+    config: {
+      fields: [
+        {
+          label: t('common.result'),
+          value: 'result'
+        }
+      ]
+    }
+  }
+}
+
 export const imageGenerateNode = {
   type: WorkflowType.ImageGenerateNode,
   text: t('views.applicationWorkflow.nodes.imageGenerateNode.text'),
@@ -332,7 +350,8 @@ export const menuNodes = [
   documentExtractNode,
   speechToTextNode,
   textToSpeechNode,
-  variableAssignNode
+  variableAssignNode,
+  mcpNode
 ]
 
 /**
@@ -405,7 +424,9 @@ export const compareList = [
   { value: 'len_ge', label: t('views.applicationWorkflow.compare.len_ge') },
   { value: 'len_gt', label: t('views.applicationWorkflow.compare.len_gt') },
   { value: 'len_le', label: t('views.applicationWorkflow.compare.len_le') },
-  { value: 'len_lt', label: t('views.applicationWorkflow.compare.len_lt') }
+  { value: 'len_lt', label: t('views.applicationWorkflow.compare.len_lt') },
+  { value: 'is_true', label: t('views.applicationWorkflow.compare.is_true') },
+  { value: 'is_not_true', label: t('views.applicationWorkflow.compare.is_not_true') }
 ]
 
 export const nodeDict: any = {
@@ -426,7 +447,8 @@ export const nodeDict: any = {
   [WorkflowType.TextToSpeechNode]: textToSpeechNode,
   [WorkflowType.SpeechToTextNode]: speechToTextNode,
   [WorkflowType.ImageGenerateNode]: imageGenerateNode,
-  [WorkflowType.VariableAssignNode]: variableAssignNode
+  [WorkflowType.VariableAssignNode]: variableAssignNode,
+  [WorkflowType.McpNode]: mcpNode
 }
 export function isWorkFlow(type: string | undefined) {
   return type === 'WORK_FLOW'
