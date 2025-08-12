@@ -14,20 +14,20 @@ class BaseMcpNode(IMcpNode):
         self.context['result'] = details.get('result')
         self.context['tool_params'] = details.get('tool_params')
         self.context['mcp_tool'] = details.get('mcp_tool')
-        self.answer_text = details.get('result')
 
     def execute(self, mcp_servers, mcp_server, mcp_tool, tool_params, **kwargs) -> NodeResult:
         servers = json.loads(mcp_servers)
         params = json.loads(json.dumps(tool_params))
         params = self.handle_variables(params)
 
-        async def call_tool(s, session, t, a):
-            async with MultiServerMCPClient(s) as client:
-                s = await client.sessions[session].call_tool(t, a)
-                return s
+        async def call_tool(t, a):
+            client = MultiServerMCPClient(servers)
+            async with client.session(mcp_server) as s:
+                return await s.call_tool(t, a)
 
-        res = asyncio.run(call_tool(servers, mcp_server, mcp_tool, params))
-        return NodeResult({'result': [content.text for content in res.content], 'tool_params': params, 'mcp_tool': mcp_tool}, {})
+        res = asyncio.run(call_tool(mcp_tool, params))
+        return NodeResult(
+            {'result': [content.text for content in res.content], 'tool_params': params, 'mcp_tool': mcp_tool}, {})
 
     def handle_variables(self, tool_params):
         # 处理参数中的变量

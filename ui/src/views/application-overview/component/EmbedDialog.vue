@@ -13,7 +13,7 @@
           <p class="title p-16 bold">
             {{ $t('views.applicationOverview.appInfo.EmbedDialog.fullscreenModeTitle') }}
           </p>
-          <img src="@/assets/window1.png" alt="" class="ml-8" height="150" />
+          <img src="@/assets/application/window1.png" alt="" class="ml-8" height="150" />
           <div class="code layout-bg border-t p-8">
             <div class="flex-between p-8">
               <span class="bold">{{
@@ -36,7 +36,7 @@
           <p class="title p-16 bold">
             {{ $t('views.applicationOverview.appInfo.EmbedDialog.mobileModeTitle') }}
           </p>
-          <img src="@/assets/window3.png" alt="" class="ml-8" height="150" />
+          <img src="@/assets/application/window3.png" alt="" class="ml-8" height="150" />
           <div class="code layout-bg border-t p-8">
             <div class="flex-between p-8">
               <span class="bold">{{
@@ -59,7 +59,7 @@
           <p class="title p-16 bold">
             {{ $t('views.applicationOverview.appInfo.EmbedDialog.floatingModeTitle') }}
           </p>
-          <img src="@/assets/window2.png" alt="" class="ml-8" height="150" />
+          <img src="@/assets/application/window2.png" alt="" class="ml-8" height="150" />
           <div class="code layout-bg border-t p-8">
             <div class="flex-between p-8">
               <span class="bold">{{
@@ -89,7 +89,7 @@ const { application } = useStore()
 
 const props = defineProps({
   data: Object,
-  apiInputParams: String
+  apiInputParams: String,
 })
 
 const emit = defineEmits(['addData'])
@@ -104,7 +104,7 @@ const source3 = ref('')
 const urlParams1 = computed(() => (props.apiInputParams ? '?' + props.apiInputParams : ''))
 const urlParams2 = computed(() => (props.apiInputParams ? '&' + props.apiInputParams : ''))
 const urlParams3 = computed(() =>
-  props.apiInputParams ? '?mode=mobile&' + props.apiInputParams : '?mode=mobile'
+  props.apiInputParams ? '?mode=mobile&' + props.apiInputParams : '?mode=mobile',
 )
 watch(dialogVisible, (bool) => {
   if (!bool) {
@@ -126,9 +126,9 @@ allow="microphone">
   source2.value = `<script
 async
 defer
-src="${window.location.origin}/api/application/embed?protocol=${window.location.protocol.replace(
+src="${application.location}api/embed?protocol=${window.location.protocol.replace(
     ':',
-    ''
+    '',
   )}&host=${window.location.host}&token=${val}${urlParams2.value}">
 <\/script>
 `

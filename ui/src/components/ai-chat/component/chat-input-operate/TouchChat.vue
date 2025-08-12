@@ -1,9 +1,9 @@
 <template>
-  <div class="touch-chat w-full mr-8">
+  <div class="touch-chat p-8 pb-0">
     <el-button
       text
       bg
-      class="microphone-button w-full mt-8 ml-8 mb-8"
+      class="microphone-button w-full"
       style="font-size: 1rem; padding: 1.2rem 0 !important; background-color: #eff0f1"
       @touchstart="onTouchStart"
       @touchmove="onTouchMove"
@@ -14,7 +14,11 @@
     </el-button>
     <!-- 使用 custom-class 自定义样式 -->
     <transition name="el-fade-in-linear">
-      <el-card class="custom-speech-card" :class="isTouching ? '' : 'active'" v-if="dialogVisible">
+      <el-card
+        class="custom-speech-card white-bg"
+        :class="isTouching ? '' : 'active'"
+        v-if="dialogVisible"
+      >
         <p>
           <el-text type="info" v-if="isTouching"
             >00:{{ props.time < 10 ? `0${props.time}` : props.time }}</el-text
@@ -28,9 +32,9 @@
         <p class="lighter" :style="{ visibility: isTouching ? 'visible' : 'hidden' }">
           {{ message }}
         </p>
-        <div class="speech-img flex-center border-r-4 mt-16">
-          <img v-if="isTouching" src="@/assets/acoustic-color.svg" alt="" />
-          <img v-else src="@/assets/acoustic.svg" alt="" />
+        <div class="speech-img flex-center border-r-6 mt-16">
+          <img v-if="isTouching" src="@/assets/chat/acoustic-color.svg" alt="" />
+          <img v-else src="@/assets/chat/acoustic.svg" alt="" />
         </div>
       </el-card>
     </transition>
@@ -39,20 +43,19 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-// import { Close } from '@element-plus/icons-vue'
 const props = defineProps({
   time: {
     type: Number,
-    default: 0
+    default: 0,
   },
   start: {
     type: Boolean,
-    default: false
+    default: false,
   },
   disabled: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 const emit = defineEmits(['TouchStart', 'TouchEnd'])
 // 移动端语音
@@ -77,7 +80,7 @@ watch(
       dialogVisible.value = false
       isTouching.value = false
     }
-  }
+  },
 )
 watch(
   () => props.start,
@@ -90,7 +93,7 @@ watch(
       dialogVisible.value = false
       isTouching.value = false
     }
-  }
+  },
 )
 
 function onTouchStart(event: any) {
@@ -127,7 +130,6 @@ function onTouchEnd() {
   left: 50%; /* 水平居中 */
   transform: translateX(-50%);
   width: 92%;
-  background: #ffffff;
   border: 1px solid #ffffff;
   box-shadow: 0px 6px 24px 0px rgba(31, 35, 41, 0.08);
   z-index: 999;

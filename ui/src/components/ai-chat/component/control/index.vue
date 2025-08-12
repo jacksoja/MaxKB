@@ -11,7 +11,6 @@
 <script setup lang="ts">
 import { Vue3Menus } from 'vue3-menus'
 import { MsgSuccess } from '@/utils/message'
-import AppIcon from '@/components/icons/AppIcon.vue'
 import bus from '@/bus'
 import { ref, nextTick, onMounted } from 'vue'
 import { t } from '@/locales'
@@ -84,7 +83,7 @@ const menus = ref([
           })
         }
       }
-    }
+    },
   },
   {
     label: t('chat.quote'),
@@ -92,8 +91,8 @@ const menus = ref([
     click: () => {
       bus.emit('chat-input', getSelection())
       clearSelectedText()
-    }
-  }
+    },
+  },
 ])
 /**
  * 清除选中文本

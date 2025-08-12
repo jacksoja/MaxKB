@@ -1,19 +1,27 @@
 export default {
+  mine: '我的',
+  logoutContent: '退出登录不会丢失任何数据，你仍可以登录此账号。',
+  confirmModification: '确认修改',
   noHistory: '暂无历史记录',
   createChat: '新建对话',
+  clearChat: '清空对话',
   history: '历史记录',
   only20history: '仅显示最近 20 条对话',
   question_count: '条提问',
   exportRecords: '导出聊天记录',
   chatId: '对话 ID',
+  chatUserId: '对话用户 ID',
+  chatUserType: '对话用户类型',
+  chatUser: '对话用户',
   userInput: '用户输入',
   quote: '引用',
   download: '点击下载文件',
   transcribing: '转文字中',
+  noDocument: '原文档不存在',
   passwordValidator: {
     title: '请输入密码打开链接',
     errorMessage1: '密码不能为空',
-    errorMessage2: '密码错误'
+    errorMessage2: '密码错误',
   },
   operation: {
     play: '点击播放',
@@ -25,7 +33,7 @@ export default {
     cancelOppose: '取消反对',
     continue: '继续',
     stopChat: '停止回答',
-    startChat: '开始对话'
+    startChat: '开始对话',
   },
   tip: {
     error500Message: '抱歉，当前正在维护，无法提供服务，请稍后再试！',
@@ -44,12 +52,12 @@ export default {
     requiredMessage: '请填写所有必填字段',
     inputParamMessage1: '请在URL中填写参数',
     inputParamMessage2: '的值',
-    prologueMessage: '抱歉，当前正在维护，无法提供服务，请稍后再试！'
+    prologueMessage: '抱歉，当前正在维护，无法提供服务，请稍后再试！',
   },
   inputPlaceholder: {
     speaking: '说话中',
     recorderLoading: '转文字中',
-    default: '请输入问题'
+    default: '请输入问题',
   },
   uploadFile: {
     label: '上传文件',
@@ -61,7 +69,8 @@ export default {
     limitMessage2: '个文件',
     sizeLimit: '单个文件大小不能超过',
     imageMessage: '请解析图片内容',
-    errorMessage: '上传失败'
+    fileMessage: '请解析文件内容',
+    errorMessage: '上传失败',
   },
   executionDetails: {
     title: '执行详情',
@@ -80,18 +89,25 @@ export default {
     rerankerResult: '重排结果',
     paragraph: '分段',
     noSubmit: '用户未提交',
-    errMessage: '错误日志'
+    errMessage: '错误日志',
   },
   KnowledgeSource: {
     title: '知识来源',
     referenceParagraph: '引用分段',
     consume: '消耗tokens',
-    consumeTime: '耗时'
+    consumeTime: '耗时',
+    noSource: '没有检索到知识来源',
   },
   paragraphSource: {
     title: '知识库引用',
     question: '用户问题',
-    optimizationQuestion: '优化后问题'
+    optimizationQuestion: '优化后问题',
+    questionPadded: '优化后问题',
+    system: '角色设定',
+    historyRecord: '历史记录',
+    currentChat: '本次对话',
+    AiResponse: 'AI 回答',
+    knowedMessage: '已知信息',
   },
-  editTitle: '编辑标题'
+  editTitle: '编辑标题',
 }

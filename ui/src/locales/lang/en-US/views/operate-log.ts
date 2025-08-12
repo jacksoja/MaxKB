@@ -5,8 +5,7 @@ export default {
       label: 'Operate menu'
     },
     operate: {
-      label: 'Operate',
-      detail: 'Operate details'
+      label: 'Operate'
     },
     user: {
       label: 'Operate user'

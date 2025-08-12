@@ -24,7 +24,7 @@
                   value="referencing"
                 />
                 <el-option
-                  :label="$t('views.applicationWorkflow.nodes.replyNode.replyContent.custom')"
+                  :label="$t('common.custom')"
                   value="content"
                 />
               </el-select>
@@ -45,7 +45,7 @@
             :nodeModel="nodeModel"
             class="w-full"
             :placeholder="
-              $t('views.applicationWorkflow.nodes.searchDatasetNode.searchQuestion.placeholder')
+              $t('views.applicationWorkflow.nodes.searchKnowledgeNode.searchQuestion.placeholder')
             "
             v-model="form_data.fields"
           />
@@ -97,7 +97,7 @@ const form = {
   reply_type: 'content',
   content: '',
   fields: [],
-  is_result: false
+  is_result: true,
 }
 
 const form_data = computed({

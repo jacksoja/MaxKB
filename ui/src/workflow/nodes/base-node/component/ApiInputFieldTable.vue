@@ -1,6 +1,6 @@
 <template>
   <div class="flex-between mb-16">
-    <h5 class="lighter">{{ $t('views.template.templateForm.title.apiParamPassing') }}</h5>
+    <h5 class="lighter">{{ $t('views.model.modelForm.title.apiParamPassing') }}</h5>
     <el-button link type="primary" @click="openAddDialog()">
       <el-icon class="mr-4">
         <Plus />
@@ -41,15 +41,13 @@
         <span class="mr-4">
           <el-tooltip effect="dark" :content="$t('common.modify')" placement="top">
             <el-button type="primary" text @click.stop="openAddDialog(row, $index)">
-              <el-icon><EditPen /></el-icon>
+              <AppIcon iconName="app-edit"></AppIcon>
             </el-button>
           </el-tooltip>
         </span>
         <el-tooltip effect="dark" :content="$t('common.delete')" placement="top">
           <el-button type="primary" text @click="deleteField($index)">
-            <el-icon>
-              <Delete />
-            </el-icon>
+            <AppIcon iconName="app-delete"></AppIcon>
           </el-button>
         </el-tooltip>
       </template>
@@ -94,7 +92,7 @@ function refreshFieldList(data: any) {
     }
   }
   // 查看另一个list又没有重复的
-  let arr = props.nodeModel.properties.user_input_field_list
+  const arr = props.nodeModel.properties.user_input_field_list
   for (let i = 0; i < arr.length; i++) {
     if (arr[i].field === data.variable) {
       MsgError(t('views.applicationWorkflow.tip.paramErrorMessage') + data.variable)
@@ -132,7 +130,7 @@ function onDragHandle() {
       items.splice(evt.newIndex, 0, movedItem)
       inputFieldList.value = items
       props.nodeModel.graphModel.eventCenter.emit('refreshFieldList')
-    }
+    },
   })
 }
 

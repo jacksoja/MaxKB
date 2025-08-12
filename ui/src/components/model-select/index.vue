@@ -19,8 +19,9 @@
               class="model-icon mr-8"
             ></span>
             <span>{{ item.name }}</span>
-            <el-tag v-if="item.permission_type === 'PUBLIC'" type="info" class="info-tag ml-8 mt-4">
-              {{ $t('common.public') }}
+
+            <el-tag v-if="item.type === 'share'" type="info" class="info-tag ml-8 mt-4">
+              {{ t('views.shared.title') }}
             </el-tag>
           </div>
           <el-icon class="check-icon" v-if="item.id === modelValue">
@@ -42,7 +43,7 @@
               class="model-icon mr-8"
             ></span>
             <span>{{ item.name }}</span>
-            <span class="danger">{{ $t('common.unavailable') }}</span>
+            <span class="color-danger">{{ $t('common.unavailable') }}</span>
           </div>
           <el-icon class="check-icon" v-if="item.id === modelValue">
             <Check />
@@ -52,11 +53,13 @@
       <template #footer v-if="showFooter">
         <slot name="footer">
           <div class="w-full text-left cursor" @click="openCreateModel(undefined, props.modelType)">
-            <el-button type="primary" link>
+            <el-button type="primary" link
+              v-if="permissionPrecise.create()"
+            >
               <el-icon class="mr-4">
                 <Plus />
               </el-icon>
-              {{ $t('views.application.applicationForm.buttons.addModel') }}
+              {{ $t('views.application.operation.addModel') }}
             </el-button>
           </div>
         </slot>
@@ -79,12 +82,13 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
 import type { Provider } from '@/api/type/model'
-import { relatedObject } from '@/utils/utils'
-import CreateModelDialog from '@/views/template/component/CreateModelDialog.vue'
-import SelectProviderDialog from '@/views/template/component/SelectProviderDialog.vue'
+import { relatedObject } from '@/utils/array'
+import CreateModelDialog from '@/views/model/component/CreateModelDialog.vue'
+import SelectProviderDialog from '@/views/model/component/SelectProviderDialog.vue'
 
 import { t } from '@/locales'
 import useStore from '@/stores'
+import permissionMap from '@/permission'
 
 defineOptions({ name: 'ModelSelect' })
 const props = defineProps<{
@@ -94,14 +98,19 @@ const props = defineProps<{
   modelType?: ''
 }>()
 
+const permissionPrecise = computed(() => {
+  return permissionMap['model']['workspace']
+})
+
 const emit = defineEmits(['update:modelValue', 'change', 'submitModel'])
 const modelValue = computed({
   set: (item) => {
+    emit('change', item)
     emit('update:modelValue', item)
   },
   get: () => {
     return props.modelValue
-  }
+  },
 })
 const { model } = useStore()
 
@@ -127,7 +136,6 @@ const openCreateModel = (provider?: Provider, model_type?: string) => {
   if (provider && provider.provider) {
     createModelRef.value?.open(provider, model_type)
   } else {
-    console.log(model_type)
     selectProviderRef.value?.open(model_type)
   }
 }

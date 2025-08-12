@@ -1,7 +1,7 @@
 <template>
   <NodeContainer :nodeModel="nodeModel">
     <h5 class="title-decoration-1 mb-8">{{ $t('views.applicationWorkflow.nodeSetting') }}</h5>
-    <div class="border-r-4 p-8-12 mb-8 layout-bg lighter">
+    <div class="border-r-6 p-8-12 mb-8 layout-bg lighter">
       <el-form
         @submit.prevent
         :model="form_data"
@@ -12,7 +12,28 @@
         hide-required-asterisk
       >
         <el-form-item label="MCP Server Config">
+          <template #label>
+            <div class="flex-between">
+              <div>
+                MCP Server Config
+                <span class="color-danger">*</span>
+              </div>
+              <el-select
+                :teleported="false"
+                v-model="form_data.mcp_source"
+                size="small"
+                style="width: 85px"
+              >
+                <el-option
+                  :label="$t('views.applicationWorkflow.nodes.mcpNode.reference')"
+                  value="referencing"
+                />
+                <el-option :label="$t('common.custom')" value="custom" />
+              </el-select>
+            </div>
+          </template>
           <MdEditorMagnify
+            v-if="form_data.mcp_source === 'custom'"
             @wheel="wheel"
             title="MCP Server Config"
             v-model="form_data.mcp_servers"
@@ -20,6 +41,19 @@
             @submitDialog="submitDialog"
             :placeholder="mcpServerJson"
           />
+          <el-select v-else v-model="form_data.mcp_tool_id" filterable @change="mcpToolSelectChange">
+            <el-option
+              v-for="mcpTool in mcpToolSelectOptions"
+              :key="mcpTool.id"
+              :label="mcpTool.name"
+              :value="mcpTool.id"
+            >
+              <span>{{ mcpTool.name }}</span>
+              <el-tag v-if="mcpTool.scope === 'SHARED'" type="info" class="info-tag ml-8 mt-4">
+                {{ t('views.shared.title') }}
+              </el-tag>
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item>
           <template v-slot:label>
@@ -59,123 +93,174 @@
     <h5 class="title-decoration-1 mb-8">
       {{ $t('views.applicationWorkflow.nodes.mcpNode.toolParam') }}
     </h5>
-    <div
-      class="border-r-4 p-8-12 mb-8 layout-bg lighter"
-      v-if="form_data.tool_params[form_data.params_nested]"
-    >
-      <el-form
-        ref="dynamicsFormRef"
-        label-position="top"
-        v-loading="loading"
-        require-asterisk-position="right"
-        :hide-required-asterisk="true"
-        v-if="form_data.mcp_tool"
-        @submit.prevent
-      >
-        <el-form-item
-          v-for="item in form_data.tool_form_field" :key="item.field"
-          :required="item.required"
+    <template v-if="form_data.tool_params[form_data.params_nested]">
+      <div class="p-8-12" v-if="!form_data.mcp_tool">
+        <el-text type="info">{{ $t('common.noData') }}</el-text>
+      </div>
+      <div v-else class="border-r-6 p-8-12 mb-8 layout-bg lighter">
+        <el-form
+          ref="dynamicsFormRef"
+          label-position="top"
+          v-loading="loading"
+          require-asterisk-position="right"
+          :hide-required-asterisk="true"
+          v-if="form_data.mcp_tool"
+          @submit.prevent
         >
-          <template #label>
-            <div class="flex-between">
-              <div>
-                <TooltipLabel :label="item.label.label" :tooltip="item.label.attrs.tooltip" />
-                <span v-if="item.required" class="danger">*</span>
+          <el-form-item
+            v-for="item in form_data.tool_form_field"
+            :key="item.field"
+            :required="item.required"
+          >
+            <template #label>
+              <div class="flex-between">
+                <div>
+                  <TooltipLabel :label="item.label.label" :tooltip="item.label.attrs.tooltip" />
+                  <span v-if="item.required" class="color-danger">*</span>
+                </div>
+                <el-select
+                  :teleported="false"
+                  v-model="item.source"
+                  size="small"
+                  style="width: 85px"
+                  @change="form_data.tool_params[form_data.params_nested] = {}"
+                >
+                  <el-option
+                    :label="$t('views.applicationWorkflow.nodes.replyNode.replyContent.reference')"
+                    value="referencing"
+                  />
+                  <el-option :label="$t('common.custom')" value="custom" />
+                </el-select>
               </div>
-              <el-select :teleported="false" v-model="item.source" size="small"
-                         style="width: 85px"
-                         @change="form_data.tool_params[form_data.params_nested] = {}">
-                <el-option
-                  :label="$t('views.applicationWorkflow.nodes.replyNode.replyContent.reference')"
-                  value="referencing"
-                />
-                <el-option
-                  :label="$t('views.applicationWorkflow.nodes.replyNode.replyContent.custom')"
-                  value="custom"
-                />
-              </el-select>
-            </div>
-          </template>
-          <el-input
-            v-if="item.source === 'custom'"
-            v-model="form_data.tool_params[form_data.params_nested][item.label.label]"
-          />
-          <NodeCascader
-            v-else
-            ref="nodeCascaderRef2"
-            :nodeModel="nodeModel"
-            class="w-full"
-            :placeholder="$t('views.applicationWorkflow.variable.placeholder')"
-            v-model="form_data.tool_params[form_data.params_nested][item.label.label]"
-          />
-        </el-form-item>
-      </el-form>
-    </div>
-    <div
-      v-else
-      class="border-r-4 p-8-12 mb-8 layout-bg lighter"
-    >
-      <el-form
-        ref="dynamicsFormRef"
-        label-position="top"
-        v-loading="loading"
-        require-asterisk-position="right"
-        :hide-required-asterisk="true"
-        v-if="form_data.mcp_tool"
-        @submit.prevent
-      >
-        <el-form-item
-          v-for="item in form_data.tool_form_field" :key="item.field"
-          :required="item.required"
+            </template>
+            <el-input
+              v-if="item.source === 'custom' && item.input_type === 'TextInput'"
+              v-model="form_data.tool_params[form_data.params_nested][item.label.label]"
+            />
+            <el-input-number
+              v-else-if="item.source === 'custom' && item.input_type === 'NumberInput'"
+              v-model="form_data.tool_params[form_data.params_nested][item.label.label]"
+            />
+            <el-switch
+              v-else-if="item.source === 'custom' && item.input_type === 'SwitchInput'"
+              v-model="form_data.tool_params[form_data.params_nested][item.label.label]"
+            />
+            <el-input
+              v-else-if="item.source === 'custom' && item.input_type === 'JsonInput'"
+              v-model="form_data.tool_params[form_data.params_nested][item.label.label]"
+              type="textarea"
+            />
+            <NodeCascader
+              v-if="item.source === 'referencing'"
+              ref="nodeCascaderRef2"
+              :nodeModel="nodeModel"
+              class="w-full"
+              :placeholder="$t('views.applicationWorkflow.variable.placeholder')"
+              v-model="form_data.tool_params[form_data.params_nested][item.label.label]"
+            />
+          </el-form-item>
+        </el-form>
+      </div>
+    </template>
+    <template v-else>
+      <div class="p-8-12" v-if="!form_data.mcp_tool">
+        <el-text type="info">{{ $t('common.noData') }}</el-text>
+      </div>
+      <div v-else class="border-r-6 p-8-12 mb-8 layout-bg lighter">
+        <el-form
+          ref="dynamicsFormRef"
+          label-position="top"
+          v-loading="loading"
+          require-asterisk-position="right"
+          :hide-required-asterisk="true"
+          v-if="form_data.mcp_tool"
+          @submit.prevent
         >
-          <template #label>
-            <div class="flex-between">
-              <div>
-                <TooltipLabel :label="item.label.label" :tooltip="item.label.attrs.tooltip" />
-                <span v-if="item.required" class="danger">*</span>
+          <el-form-item
+            v-for="item in form_data.tool_form_field"
+            :key="item.field"
+            :required="item.required"
+          >
+            <template #label>
+              <div class="flex-between">
+                <div>
+                  <TooltipLabel :label="item.label.label" :tooltip="item.label.attrs.tooltip" />
+                  <span v-if="item.required" class="color-danger">*</span>
+                </div>
+                <el-select
+                  :teleported="false"
+                  v-model="item.source"
+                  size="small"
+                  style="width: 85px"
+                >
+                  <el-option
+                    :label="$t('views.applicationWorkflow.nodes.replyNode.replyContent.reference')"
+                    value="referencing"
+                  />
+                  <el-option :label="$t('common.custom')" value="custom" />
+                </el-select>
               </div>
-              <el-select :teleported="false" v-model="item.source" size="small"
-                         style="width: 85px">
-                <el-option
-                  :label="$t('views.applicationWorkflow.nodes.replyNode.replyContent.reference')"
-                  value="referencing"
-                />
-                <el-option
-                  :label="$t('views.applicationWorkflow.nodes.replyNode.replyContent.custom')"
-                  value="custom"
-                />
-              </el-select>
-            </div>
-          </template>
-          <el-input
-            v-if="item.source === 'custom'"
-            v-model="form_data.tool_params[item.label.label]"
-          />
-          <NodeCascader
-            v-else
-            ref="nodeCascaderRef2"
-            :nodeModel="nodeModel"
-            class="w-full"
-            :placeholder="$t('views.applicationWorkflow.variable.placeholder')"
-            v-model="form_data.tool_params[item.label.label]"
-          />
-        </el-form-item>
-      </el-form>
-    </div>
+            </template>
+            <el-input
+              v-if="item.source === 'custom' && item.input_type === 'TextInput'"
+              v-model="form_data.tool_params[item.label.label]"
+            />
+            <el-input-number
+              v-else-if="item.source === 'custom' && item.input_type === 'NumberInput'"
+              v-model="form_data.tool_params[item.label.label]"
+            />
+            <el-switch
+              v-else-if="item.source === 'custom' && item.input_type === 'SwitchInput'"
+              v-model="form_data.tool_params[item.label.label]"
+            />
+            <el-input
+              v-else-if="item.source === 'custom' && item.input_type === 'JsonInput'"
+              v-model="form_data.tool_params[item.label.label]"
+              type="textarea"
+            />
+            <NodeCascader
+              v-if="item.source === 'referencing'"
+              ref="nodeCascaderRef2"
+              :nodeModel="nodeModel"
+              class="w-full"
+              :placeholder="$t('views.applicationWorkflow.variable.placeholder')"
+              v-model="form_data.tool_params[item.label.label]"
+            />
+          </el-form-item>
+        </el-form>
+      </div>
+    </template>
   </NodeContainer>
 </template>
 <script setup lang="ts">
 import { cloneDeep, set } from 'lodash'
 import NodeContainer from '@/workflow/common/NodeContainer.vue'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, inject } from 'vue'
 import { isLastNode } from '@/workflow/common/data'
-import applicationApi from '@/api/application'
 import { t } from '@/locales'
 import { MsgError, MsgSuccess } from '@/utils/message'
 import TooltipLabel from '@/components/dynamics-form/items/label/TooltipLabel.vue'
 import NodeCascader from '@/workflow/common/NodeCascader.vue'
-
+import { useRoute } from 'vue-router'
+import { loadSharedApi } from '@/utils/dynamics-api/shared-api'
+import useStore from "@/stores";
 const props = defineProps<{ nodeModel: any }>()
+const { user } = useStore()
+
+const route = useRoute()
+const {
+  params: { id },
+} = route as any
+const getApplicationDetail = inject('getApplicationDetail') as any
+const applicationDetail = getApplicationDetail()
+
+const apiType = computed(() => {
+  if (route.path.includes('resource-management')) {
+    return 'systemManage'
+  } else {
+    return 'workspace'
+  }
+})
 
 const dynamicsFormRef = ref()
 const loading = ref(false)
@@ -201,17 +286,31 @@ const form = {
   mcp_tools: [],
   mcp_servers: '',
   mcp_server: '',
+  mcp_source: 'referencing',
+  mcp_tool_id: '',
   tool_params: {},
   tool_form_field: [],
-  params_nested: ''
+  params_nested: '',
 }
+
+const mcpToolSelectOptions = ref<any[]>([])
 
 function submitDialog(val: string) {
   set(props.nodeModel.properties.node_data, 'mcp_servers', val)
 }
 
+async function mcpToolSelectChange() {
+  const tool = await loadSharedApi({ type: 'tool', systemType: apiType.value })
+    .getToolById(form_data.value.mcp_tool_id, loading)
+  form_data.value.mcp_servers = tool.data.code
+}
+
 function getTools() {
-  if (!form_data.value.mcp_servers) {
+  if (form_data.value.mcp_source === 'referencing' && !form_data.value.mcp_tool_id) {
+    MsgError(t('views.applicationWorkflow.nodes.mcpNode.mcpToolTip'))
+    return
+  }
+  if (form_data.value.mcp_source === 'custom' && !form_data.value.mcp_servers) {
     MsgError(t('views.applicationWorkflow.nodes.mcpNode.mcpServerTip'))
     return
   }
@@ -221,38 +320,53 @@ function getTools() {
     MsgError(t('views.applicationWorkflow.nodes.mcpNode.mcpServerTip'))
     return
   }
-  applicationApi
-    .getMcpTools({ mcp_servers: form_data.value.mcp_servers }, loading)
+  loadSharedApi({ type: 'application', systemType: apiType.value })
+    .getMcpTools(id, form_data.value.mcp_servers, loading)
     .then((res: any) => {
       form_data.value.mcp_tools = res.data
       MsgSuccess(t('views.applicationWorkflow.nodes.mcpNode.getToolsSuccess'))
+      // 修改了json，刷新mcp_server
+      form_data.value.mcp_server = form_data.value.mcp_tools.find(
+        (item: any) => item.name === form_data.value.mcp_tool,
+      )?.server
     })
 }
 
 function changeTool() {
-  form_data.value.mcp_server = form_data.value.mcp_tools.filter(
-    (item: any) => item.name === form_data.value.mcp_tool
-  )[0].server
-  // console.log(form_data.value.mcp_server)
+  form_data.value.mcp_server = form_data.value.mcp_tools.find(
+    (item: any) => item.name === form_data.value.mcp_tool,
+  )?.server
 
-  const args_schema = form_data.value.mcp_tools.filter(
-    (item: any) => item.name === form_data.value.mcp_tool
-  )[0].args_schema
+  const args_schema = form_data.value.mcp_tools.find(
+    (item: any) => item.name === form_data.value.mcp_tool,
+  )?.args_schema
   form_data.value.tool_form_field = []
-  for (const item in args_schema.properties) {
-    let params = args_schema.properties[item].properties
+  for (const item in args_schema?.properties) {
+    const params = args_schema?.properties[item].properties
     if (params) {
       form_data.value.params_nested = item
       for (const item2 in params) {
+        let input_type = 'TextInput'
+        if (params[item2].type === 'string') {
+          input_type = 'TextInput'
+        } else if (params[item2].type === 'number') {
+          input_type = 'NumberInput'
+        } else if (params[item2].type === 'boolean') {
+          input_type = 'SwitchInput'
+        } else if (params[item2].type === 'array') {
+          input_type = 'JsonInput'
+        } else if (params[item2].type === 'object') {
+          input_type = 'JsonInput'
+        }
         form_data.value.tool_form_field.push({
           field: item2,
           label: {
             input_type: 'TooltipLabel',
             label: item2,
             attrs: { tooltip: params[item2].description },
-            props_info: {}
+            props_info: {},
           },
-          input_type: 'TextInput',
+          input_type: input_type,
           source: 'referencing',
           required: args_schema.properties[item].required?.indexOf(item2) !== -1,
           props_info: {
@@ -260,23 +374,35 @@ function changeTool() {
               {
                 required: args_schema.properties[item].required?.indexOf(item2) !== -1,
                 message: t('dynamicsForm.tip.requiredMessage'),
-                trigger: 'blur'
-              }
-            ]
-          }
+                trigger: 'blur',
+              },
+            ],
+          },
         })
       }
     } else {
       form_data.value.params_nested = ''
+      let input_type = 'TextInput'
+      if (args_schema.properties[item].type === 'string') {
+        input_type = 'TextInput'
+      } else if (args_schema.properties[item].type === 'number') {
+        input_type = 'NumberInput'
+      } else if (args_schema.properties[item].type === 'boolean') {
+        input_type = 'SwitchInput'
+      } else if (args_schema.properties[item].type === 'array') {
+        input_type = 'JsonInput'
+      } else if (args_schema.properties[item].type === 'object') {
+        input_type = 'JsonInput'
+      }
       form_data.value.tool_form_field.push({
         field: item,
         label: {
           input_type: 'TooltipLabel',
           label: item,
           attrs: { tooltip: args_schema.properties[item].description },
-          props_info: {}
+          props_info: {},
         },
-        input_type: 'TextInput',
+        input_type: input_type,
         source: 'referencing',
         required: args_schema.required?.indexOf(item) !== -1,
         props_info: {
@@ -284,10 +410,10 @@ function changeTool() {
             {
               required: args_schema.required?.indexOf(item) !== -1,
               message: t('dynamicsForm.tip.requiredMessage'),
-              trigger: 'blur'
-            }
-          ]
-        }
+              trigger: 'blur',
+            },
+          ],
+        },
       })
     }
   }
@@ -310,7 +436,7 @@ const form_data = computed({
   },
   set: (value) => {
     set(props.nodeModel.properties, 'node_data', value)
-  }
+  },
 })
 
 const replyNodeFormRef = ref()
@@ -328,7 +454,7 @@ const validate = async () => {
           if (!form_data.value.tool_params[form_data.value.params_nested][item]) {
             return Promise.reject({
               node: props.nodeModel,
-              errMessage: item + t('dynamicsForm.tip.requiredMessage')
+              errMessage: item + t('dynamicsForm.tip.requiredMessage'),
             })
           }
         } else {
@@ -336,7 +462,7 @@ const validate = async () => {
           if (!form_data.value.tool_params[item]) {
             return Promise.reject({
               node: props.nodeModel,
-              errMessage: item + t('dynamicsForm.tip.requiredMessage')
+              errMessage: item + t('dynamicsForm.tip.requiredMessage'),
             })
           }
         }
@@ -348,16 +474,37 @@ const validate = async () => {
     if (!form.mcp_servers) {
       return Promise.reject({
         node: props.nodeModel,
-        errMessage: t('views.applicationWorkflow.nodes.mcpNode.mcpServerTip')
+        errMessage: t('views.applicationWorkflow.nodes.mcpNode.mcpServerTip'),
       })
     }
     if (!form.mcp_tool) {
       return Promise.reject({
         node: props.nodeModel,
-        errMessage: t('views.applicationWorkflow.nodes.mcpNode.mcpToolTip')
+        errMessage: t('views.applicationWorkflow.nodes.mcpNode.mcpToolTip'),
       })
     }
   }
+}
+
+function getMcpToolSelectOptions() {
+  const obj =
+    apiType.value === 'systemManage'
+      ? {
+        scope: 'WORKSPACE',
+        tool_type: 'MCP',
+        workspace_id: applicationDetail.value?.workspace_id,
+      }
+      : {
+        scope: 'WORKSPACE',
+        tool_type: 'MCP',
+      }
+
+  loadSharedApi({type: 'tool', systemType: apiType.value})
+    .getAllToolList(obj, loading)
+    .then((res: any) => {
+      mcpToolSelectOptions.value = [...res.data.shared_tools, ...res.data.tools]
+        .filter((item: any) => item.is_active)
+    })
 }
 
 onMounted(() => {
@@ -366,7 +513,7 @@ onMounted(() => {
       set(props.nodeModel.properties.node_data, 'is_result', true)
     }
   }
-
+  getMcpToolSelectOptions()
   set(props.nodeModel, 'validate', validate)
 })
 </script>

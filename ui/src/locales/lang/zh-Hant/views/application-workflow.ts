@@ -15,29 +15,27 @@ export default {
     restoreVersion: '恢復版本',
     restoreCurrentVersion: '恢復此版本',
     addComponent: '添加組件',
-    public: '發布',
     releaseHistory: '發布歷史',
     autoSave: '自動保存',
     latestRelease: '最近發布',
     copyParam: '複製參數',
     debug: '調試',
     exit: '直接退出',
-    exitSave: '保存並退出'
+    exitSave: '保存並退出',
   },
   tip: {
-    publicSuccess: '發布成功',
     noData: '沒有找到相關結果',
     nameMessage: '名字不能為空！',
     onlyRight: '只允許從右邊的錨點連出',
     notRecyclable: '不可循環連線',
     onlyLeft: '只允許連接左邊的錨點',
     applicationNodeError: '該應用不可用',
-    functionNodeError: '該函數不可用',
+    toolNodeError: '該函數不可用',
     repeatedNodeError: '節點名稱已存在！',
     cannotCopy: '不能被複製',
     copyError: '已複製節點',
     paramErrorMessage: '參數已存在: ',
-    saveMessage: '當前修改未保存，是否保存後退出？'
+    saveMessage: '當前修改未保存，是否保存後退出？',
   },
   delete: {
     confirmTitle: '確定刪除該節點？',
@@ -80,6 +78,11 @@ export default {
     cannotEndNode: '節點不能當做結束節點'
   },
   nodes: {
+    classify: {
+      aiCapability: 'AI能力',
+      businessLogic: '業務邏輯',
+      other: '其他'
+    },
     startNode: {
       label: '開始',
       question: '用戶問題',
@@ -121,7 +124,7 @@ export default {
       defaultPrompt: '已知信息',
       think: '思考過程'
     },
-    searchDatasetNode: {
+    searchKnowledgeNode: {
       label: '知識庫檢索',
       text: '關聯知識庫，查找與問題相關的分段',
       paragraph_list: '檢索結果的分段列表',
@@ -162,7 +165,6 @@ export default {
       content: '內容',
       replyContent: {
         label: '回覆內容',
-        custom: '自定義',
         reference: '引用變量'
       }
     },
@@ -220,17 +222,6 @@ export default {
       text: '更新全域變數的值',
       assign: '賦值'
     },
-    mcpNode: {
-      label: 'MCP 調用',
-      text: '透過SSE方式執行MCP服務中的工具',
-      getToolsSuccess: '獲取工具成功',
-      getTool: '獲取工具',
-      tool: '工具',
-      toolParam: '工具變數',
-      mcpServerTip: '請輸入JSON格式的MCP服務器配置',
-      mcpToolTip: '請選擇工具',
-      configLabel: 'MCP Server Config (僅支持SSE調用方式)'
-    },
     imageGenerateNode: {
       label: '圖片生成',
       text: '根據提供的文本內容生成圖片',
@@ -270,8 +261,8 @@ export default {
         label: '選擇文本內容'
       }
     },
-    functionNode: {
-      label: '自定義函數',
+    toolNode: {
+      label: '自定義工具',
       text: '通過執行自定義腳本，實現數據處理'
     },
     applicationNode: {
@@ -292,9 +283,7 @@ export default {
     len_ge: '長度大於等於',
     len_gt: '長度大於',
     len_le: '長度小於等於',
-    len_lt: '長度小於',
-    is_true: '為真',
-    is_not_true: '不為真'
+    len_lt: '長度小於'
   },
   FileUploadSetting: {}
 }

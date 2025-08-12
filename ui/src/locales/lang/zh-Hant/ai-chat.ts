@@ -1,6 +1,10 @@
 export default {
+  mine: '我的',
+  logoutContent: '退出登入不會遺失任何資料，您仍可登入此帳號。',
+  confirmModification: '確認修改',
   noHistory: '暫無歷史記錄',
   createChat: '新建對話',
+  clearChat: '清空對話',
   history: '歷史記錄',
   only20history: '僅顯示最近 20 條對話',
   question_count: '條提問',
@@ -9,11 +13,11 @@ export default {
   userInput: '用戶輸入',
   quote: '引用',
   download: '點擊下載文件',
-  transcribing: '轉文字中',
+  noDocument: '原文檔不存在',
   passwordValidator: {
     title: '請輸入密碼打開連結',
     errorMessage1: '密碼不能為空',
-    errorMessage2: '密碼錯誤'
+    errorMessage2: '密碼錯誤',
   },
   operation: {
     play: '點擊播放',
@@ -25,7 +29,7 @@ export default {
     cancelOppose: '取消反對',
     continue: '繼續',
     stopChat: '停止回答',
-    startChat: '開始對話'
+    startChat: '開始回答',
   },
   tip: {
     error500Message: '抱歉，當前正在維護，無法提供服務，請稍後再試！',
@@ -44,12 +48,12 @@ export default {
     requiredMessage: '請填寫所有必填欄位',
     inputParamMessage1: '請在 URL 中填寫參數',
     inputParamMessage2: '的值',
-    prologueMessage: '抱歉，當前正在維護，無法提供服務，請稍後再試！'
+    prologueMessage: '抱歉，當前正在維護，無法提供服務，請稍後再試！',
   },
   inputPlaceholder: {
     speaking: '說話中',
     recorderLoading: '轉文字中',
-    default: '請輸入問題'
+    default: '請輸入問題',
   },
   uploadFile: {
     label: '上傳文件',
@@ -61,7 +65,8 @@ export default {
     limitMessage2: '個文件',
     sizeLimit: '單個文件大小不能超過',
     imageMessage: '請解析圖片內容',
-    errorMessage: '上傳失敗'
+    fileMessage: '請解析文件內容',
+    errorMessage: '上傳失敗',
   },
   executionDetails: {
     title: '執行詳細',
@@ -80,18 +85,25 @@ export default {
     rerankerResult: '重排結果',
     paragraph: '段落',
     noSubmit: '用戶未提交',
-    errMessage: '錯誤日誌'
+    errMessage: '錯誤日誌',
   },
   KnowledgeSource: {
     title: '知識來源',
     referenceParagraph: '引用段落',
     consume: '消耗tokens',
-    consumeTime: '耗時'
+    consumeTime: '耗時',
+    noSource: '沒有检索到知識來源',
   },
   paragraphSource: {
     title: '知識庫引用',
     question: '用戶問題',
-    optimizationQuestion: '優化後問題'
+    optimizationQuestion: '優化後問題',
+    questionPadded: '優化後問題',
+    system: '角色設定',
+    historyRecord: '歷史記錄',
+    currentChat: '本次對話',
+    AiResponse: 'AI 回答',
+    knowedMessage: '已知資訊',
   },
-  editTitle: '編輯標題'
+  editTitle: '編輯標題',
 }

@@ -13,7 +13,7 @@ from django.db.models import QuerySet
 
 from common.db.compiler import AppSQLCompiler
 from common.db.sql_execute import select_one, select_list, update_execute
-from common.response.result import Page
+from common.result import Page
 
 
 def get_dynamics_model(attr: dict, table_name='dynamics'):
@@ -24,7 +24,7 @@ def get_dynamics_model(attr: dict, table_name='dynamics'):
     :return: django 模型
     """
     attributes = {
-        "__module__": "dataset.models",
+        "__module__": "knowledge.models",
         "Meta": type("Meta", (), {'db_table': table_name}),
         **attr
     }

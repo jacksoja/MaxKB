@@ -8,7 +8,12 @@
     <div>
       <!-- 语音播放 -->
       <span v-if="tts">
-        <el-tooltip effect="dark" :content="$t('chat.operation.play')" placement="top" v-if="!audioPlayerStatus">
+        <el-tooltip
+          effect="dark"
+          :content="$t('chat.operation.play')"
+          placement="top"
+          v-if="!audioPlayerStatus"
+        >
           <el-button text @click="playAnswerText(data?.answer_text)">
             <AppIcon iconName="app-video-play"></AppIcon>
           </el-button>
@@ -29,15 +34,15 @@
       <el-tooltip
         v-if="buttonData.improve_paragraph_id_list.length === 0"
         effect="dark"
-        :content="$t('views.log.editContent')"
+        :content="$t('views.chatLog.editContent')"
         placement="top"
       >
         <el-button text @click="editContent(data)">
-          <el-icon><EditPen /></el-icon>
+          <AppIcon iconName="app-edit"></AppIcon>
         </el-button>
       </el-tooltip>
 
-      <el-tooltip v-else effect="dark" :content="$t('views.log.editMark')" placement="top">
+      <el-tooltip v-else effect="dark" :content="$t('views.chatLog.editMark')" placement="top">
         <el-button text @click="editMark(data)">
           <AppIcon iconName="app-document-active" class="primary"></AppIcon>
         </el-button>
@@ -54,36 +59,42 @@
       <EditContentDialog ref="EditContentDialogRef" @refresh="refreshContent" />
       <EditMarkDialog ref="EditMarkDialogRef" @refresh="refreshMark" />
       <!-- 先渲染，不然不能播放   -->
-      <audio ref="audioPlayer" v-for="item in audioList" :key="item" controls hidden="hidden"></audio>
+      <audio
+        ref="audioPlayer"
+        v-for="item in audioList"
+        :key="item"
+        controls
+        hidden="hidden"
+      ></audio>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { copyClick } from '@/utils/clipboard'
-import EditContentDialog from '@/views/log/component/EditContentDialog.vue'
-import EditMarkDialog from '@/views/log/component/EditMarkDialog.vue'
+import EditContentDialog from '@/views/chat-log/component/EditContentDialog.vue'
+import EditMarkDialog from '@/views/chat-log/component/EditMarkDialog.vue'
 import { datetimeFormat } from '@/utils/time'
-import applicationApi from '@/api/application'
+import applicationApi from '@/api/application/application'
 import { useRoute } from 'vue-router'
 import { MsgError } from '@/utils/message'
 import { t } from '@/locales'
 const route = useRoute()
 const {
-  params: { id }
+  params: { id },
 } = route as any
 
 const props = defineProps({
   data: {
     type: Object,
-    default: () => {}
+    default: () => {},
   },
   applicationId: {
     type: String,
-    default: ''
+    default: '',
   },
   tts: Boolean,
-  tts_type: String
+  tts_type: String,
 })
 
 const emit = defineEmits(['update:data'])
@@ -135,11 +146,8 @@ function markdownToPlainText(md: string) {
 }
 
 function removeFormRander(text: string) {
-  return text
-    .replace(/<form_rander>[\s\S]*?<\/form_rander>/g, '')
-    .trim()
+  return text.replace(/<form_rander>[\s\S]*?<\/form_rander>/g, '').trim()
 }
-
 
 const playAnswerText = (text: string) => {
   if (!text) {
@@ -165,7 +173,8 @@ const playAnswerTextPart = () => {
   }
   if (audioList.value[currentAudioIndex.value].includes('<audio')) {
     if (audioPlayer.value) {
-      audioPlayer.value[currentAudioIndex.value].src = audioList.value[currentAudioIndex.value].match(/src="([^"]*)"/)?.[1] || ''
+      audioPlayer.value[currentAudioIndex.value].src =
+        audioList.value[currentAudioIndex.value].match(/src="([^"]*)"/)?.[1] || ''
       audioPlayer.value[currentAudioIndex.value].play() // 自动播放音频
       audioPlayer.value[currentAudioIndex.value].onended = () => {
         currentAudioIndex.value += 1
@@ -176,7 +185,10 @@ const playAnswerTextPart = () => {
     if (audioList.value[currentAudioIndex.value] !== utterance.value?.text) {
       window.speechSynthesis.cancel()
     }
-    if (window.speechSynthesis.paused && audioList.value[currentAudioIndex.value] === utterance.value?.text) {
+    if (
+      window.speechSynthesis.paused &&
+      audioList.value[currentAudioIndex.value] === utterance.value?.text
+    ) {
       window.speechSynthesis.resume()
       return
     }
@@ -200,7 +212,11 @@ const playAnswerTextPart = () => {
       return
     }
     applicationApi
-      .postTextToSpeech((props.applicationId as string) || (id as string), { text: audioList.value[currentAudioIndex.value] }, loading)
+      .postTextToSpeech(
+        (props.applicationId as string) || (id as string),
+        { text: audioList.value[currentAudioIndex.value] },
+        loading,
+      )
       .then(async (res: any) => {
         if (res.type === 'application/json') {
           const text = await res.text()
@@ -251,7 +267,6 @@ const pausePlayAnswerText = () => {
     window.speechSynthesis.pause()
   }
 }
-
 
 function refreshMark() {
   buttonData.value.improve_paragraph_id_list = []

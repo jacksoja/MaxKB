@@ -1,6 +1,10 @@
 export default {
+  mine: 'Mine',
+  logoutContent: 'Logging out will not lose any data. You can still log in to this account.',
+  confirmModification: 'Confirm modification',
   noHistory: 'No Chat History',
   createChat: 'New Chat',
+  clearChat: 'Clear Chat',
   history: 'Chat History',
   only20history: 'Showing only the last 20 chats',
   question_count: 'Questions',
@@ -9,11 +13,11 @@ export default {
   userInput: 'User Input',
   quote: 'Quote',
   download: 'Click to Download',
-  transcribing: 'Transcribing',
+  noDocument: 'Original Document Not Found',
   passwordValidator: {
     title: 'Enter Password to Access',
     errorMessage1: 'Password cannot be empty',
-    errorMessage2: 'Incorrect password'
+    errorMessage2: 'Incorrect password',
   },
   operation: {
     play: 'Play',
@@ -25,7 +29,7 @@ export default {
     cancelOppose: 'Undo Dislike',
     continue: 'Continue',
     stopChat: 'Stop Response',
-    startChat: 'Start Chat'
+    startChat: 'Start Response',
   },
   tip: {
     error500Message: 'Sorry, the service is currently under maintenance. Please try again later!',
@@ -35,7 +39,7 @@ export default {
     answerMessage:
       'Sorry, no relevant content found. Please rephrase your question or provide more details.',
     stopAnswer: 'Response Stopped',
-    answerLoading: 'Generating Response...',
+    answerLoading: 'Generating Response',
     recorderTip: `<p>This feature requires microphone access. Browsers block recording on insecure pages. Solutions:<br/>
 1. Enable HTTPS;<br/>
 2. If HTTPS is not available, adjust browser security settings. For Chrome:<br/>
@@ -46,12 +50,12 @@ export default {
     requiredMessage: 'Please fill in all required fields',
     inputParamMessage1: 'Please specify a parameter in the URL',
     inputParamMessage2: 'value',
-    prologueMessage: 'Sorry, the service is currently under maintenance. Please try again later!'
+    prologueMessage: 'Sorry, the service is currently under maintenance. Please try again later!',
   },
   inputPlaceholder: {
     speaking: 'Speaking...',
     recorderLoading: 'Transcribing...',
-    default: 'Type your question'
+    default: 'Type your question',
   },
   uploadFile: {
     label: 'Upload File',
@@ -63,7 +67,8 @@ export default {
     limitMessage2: 'files',
     sizeLimit: 'Each file must not exceed',
     imageMessage: 'Please process the image content',
-    errorMessage: 'Upload Failed'
+    fileMessage: 'Please process the file content',
+    errorMessage: 'Upload Failed',
   },
   executionDetails: {
     title: 'Execution Details',
@@ -82,18 +87,25 @@ export default {
     rerankerResult: 'Re-ranking Results',
     paragraph: 'Segment',
     noSubmit: 'No submission from user',
-    errMessage: 'Error Log'
+    errMessage: 'Error Log',
   },
   KnowledgeSource: {
     title: 'Knowledge Source',
     referenceParagraph: 'Cited Segment',
     consume: 'Tokens',
-    consumeTime: 'Runtime'
+    consumeTime: 'Runtime',
+    noSource: 'No source found',
   },
   paragraphSource: {
     title: 'Knowledge Quote',
     question: 'User Question',
-    optimizationQuestion: 'Optimized Question'
+    optimizationQuestion: 'Optimized Question',
+    questionPadded: 'Padded Question',
+    system: 'Role Setting',
+    historyRecord: 'History Record',
+    currentChat: 'Current Chat',
+    AiResponse: 'AiResponse',
+    knowedMessage: 'Knowed Information',
   },
-  editTitle: 'Edit Title'
+  editTitle: 'Edit Title',
 }

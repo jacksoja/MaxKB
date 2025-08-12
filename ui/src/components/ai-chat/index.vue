@@ -1,91 +1,48 @@
 <template>
-  <div
-    ref="aiChatRef"
-    class="ai-chat"
-    :class="type"
-    :style="{ height: firsUserInput ? '100%' : undefined }"
-  >
-    <div
-      v-show="showUserInputContent"
-      :class="firsUserInput ? 'firstUserInput' : 'popperUserInput'"
-    >
-      <UserForm
-        v-model:api_form_data="api_form_data"
-        v-model:form_data="form_data"
-        :application="applicationDetails"
-        :type="type"
-        :first="firsUserInput"
-        @confirm="UserFormConfirm"
-        @cancel="UserFormCancel"
-        ref="userFormRef"
-      ></UserForm>
+  <div ref="aiChatRef" class="ai-chat" :class="type" :style="{
+    height: firsUserInput ? '100%' : undefined,
+    paddingBottom: applicationDetails.disclaimer ? '20px' : 0,
+  }">
+    <div v-show="showUserInputContent" :class="firsUserInput ? 'firstUserInput' : 'popperUserInput'">
+      <UserForm v-model:api_form_data="api_form_data" v-model:form_data="form_data" :application="applicationDetails"
+        :type="type" :first="firsUserInput" @confirm="UserFormConfirm" @cancel="UserFormCancel" ref="userFormRef">
+      </UserForm>
     </div>
-    <template v-if="!isUserInput || !firsUserInput || type === 'log'">
+    <template v-if="!(isUserInput || isAPIInput) || !firsUserInput || type === 'log'">
       <el-scrollbar ref="scrollDiv" @scroll="handleScrollTop">
         <div ref="dialogScrollbar" class="ai-chat__content p-16">
-          <PrologueContent
-            :type="type"
-            :application="applicationDetails"
-            :available="available"
-            :send-message="sendMessage"
-          ></PrologueContent>
+          <PrologueContent :type="type" :application="applicationDetails" :available="available"
+            :send-message="sendMessage"></PrologueContent>
 
           <template v-for="(item, index) in chatList" :key="index">
             <!-- 问题 -->
-            <QuestionContent
-              :type="type"
-              :application="applicationDetails"
-              :chat-record="item"
-            ></QuestionContent>
+            <QuestionContent :type="type" :application="applicationDetails" :chat-record="item"></QuestionContent>
             <!-- 回答 -->
-            <AnswerContent
-              :application="applicationDetails"
-              :loading="loading"
-              v-model:chat-record="chatList[index]"
-              :type="type"
-              :send-message="sendMessage"
-              :chat-management="ChatManagement"
-            ></AnswerContent>
+            <AnswerContent :application="applicationDetails" :loading="loading" v-model:chat-record="chatList[index]"
+              :type="type" :send-message="sendMessage" :chat-management="ChatManagement"
+              :executionIsRightPanel="props.executionIsRightPanel"
+              @open-execution-detail="emit('openExecutionDetail', chatList[index])"
+              @openParagraph="emit('openParagraph', chatList[index])" @openParagraphDocument="
+                (val: any) => emit('openParagraphDocument', chatList[index], val)
+              "></AnswerContent>
           </template>
-          <TransitionContent
-            v-if="transcribing"
-            :text="t('chat.transcribing')"
-            :type="type"
-            :application="applicationDetails"
-          ></TransitionContent>
+          <TransitionContent v-if="transcribing" :text="t('chat.transcribing')" :type="type"
+            :application="applicationDetails">
+          </TransitionContent>
         </div>
       </el-scrollbar>
 
-      <ChatInputOperate
-        :app-id="appId"
-        :application-details="applicationDetails"
-        :is-mobile="isMobile"
-        :type="type"
-        :send-message="sendMessage"
-        :open-chat-id="openChatId"
-        :check-input-param="checkInputParam"
-        :chat-management="ChatManagement"
-        v-model:chat-id="chartOpenId"
-        v-model:loading="loading"
-        v-model:show-user-input="showUserInput"
-        v-if="type !== 'log'"
-      >
-        <template #operateBefore>
-          <div class="flex-between">
-            <slot name="operateBefore">
-              <span></span>
-            </slot>
-
-            <el-button
-              v-if="isUserInput"
-              class="user-input-button mb-8"
-              type="primary"
-              text
-              @click="toggleUserInput"
-            >
-              <AppIcon iconName="app-user-input"></AppIcon>
-            </el-button>
-          </div>
+      <ChatInputOperate :app-id="appId" :application-details="applicationDetails" :is-mobile="isMobile" :type="type"
+        :send-message="sendMessage" :open-chat-id="openChatId" :validate="validate" :chat-management="ChatManagement"
+        v-model:chat-id="chartOpenId" v-model:loading="loading" v-model:show-user-input="showUserInput"
+        v-if="type !== 'log'">
+        <template #userInput>
+          <el-button v-if="isUserInput || isAPIInput" class="user-input-button mb-8" @click="toggleUserInput">
+            <AppIcon iconName="app-edit" :size="16" class="mr-4"></AppIcon>
+            <span class="ellipsis">
+              {{ userInputTitle || $t('chat.userInput') }}
+            </span>
+          </el-button>
         </template>
       </ChatInputOperate>
 
@@ -94,14 +51,16 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, nextTick, computed, watch, reactive, onMounted, onBeforeUnmount } from 'vue'
+import { type Ref, ref, nextTick, computed, watch, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
-import applicationApi from '@/api/application'
-import logApi from '@/api/log'
+import applicationApi from '@/api/application/application'
+import chatAPI from '@/api/chat/chat'
+import SystemResourceManagementApplicationAPI from "@/api/system-resource-management/application.ts"
+import syetrmResourceManagementChatLogApi from '@/api/system-resource-management/chat-log'
+import chatLogApi from '@/api/application/chat-log'
 import { ChatManagement, type chatType } from '@/api/type/application'
-import { randomId } from '@/utils/utils'
+import { randomId } from '@/utils/common'
 import useStore from '@/stores'
-import { isWorkFlow } from '@/utils/application'
 import { debounce } from 'lodash'
 import AnswerContent from '@/components/ai-chat/component/answer-content/index.vue'
 import QuestionContent from '@/components/ai-chat/component/question-content/index.vue'
@@ -117,7 +76,7 @@ defineOptions({ name: 'AiChat' })
 const route = useRoute()
 const {
   params: { accessToken, id },
-  query: { mode }
+  query: { mode },
 } = route as any
 const props = withDefaults(
   defineProps<{
@@ -127,14 +86,21 @@ const props = withDefaults(
     record?: Array<chatType>
     available?: boolean
     chatId?: string
+    executionIsRightPanel?: boolean
   }>(),
   {
     applicationDetails: () => ({}),
     available: true,
-    type: 'ai-chat'
-  }
+    type: 'ai-chat',
+  },
 )
-const emit = defineEmits(['refresh', 'scroll'])
+const emit = defineEmits([
+  'refresh',
+  'scroll',
+  'openExecutionDetail',
+  'openParagraph',
+  'openParagraphDocument',
+])
 const { application, common } = useStore()
 const isMobile = computed(() => {
   return common.isMobile() || mode === 'embed' || mode === 'mobile'
@@ -150,8 +116,9 @@ const form_data = ref<any>({})
 const api_form_data = ref<any>({})
 const userFormRef = ref<InstanceType<typeof UserForm>>()
 // 用户输入
-const firsUserInput = ref(true)
+const firsUserInput = ref(false)
 const showUserInput = ref(false)
+
 // 初始表单数据（用于恢复）
 const initialFormData = ref({})
 const initialApiFormData = ref({})
@@ -159,10 +126,25 @@ const initialApiFormData = ref({})
 const isUserInput = computed(
   () =>
     props.applicationDetails.work_flow?.nodes?.filter((v: any) => v.id === 'base-node')[0]
-      .properties.user_input_field_list.length > 0
+      ?.properties.user_input_field_list.length > 0,
+)
+
+const userInputTitle = computed(
+  () =>
+    props.applicationDetails.work_flow?.nodes?.filter((v: any) => v.id === 'base-node')[0]
+      ?.properties?.user_input_config?.title,
+)
+const isAPIInput = computed(
+  () =>
+    props.type === 'debug-ai-chat' &&
+    props.applicationDetails.work_flow?.nodes?.filter((v: any) => v.id === 'base-node')[0]
+      .properties.api_input_field_list.length > 0,
 )
 const showUserInputContent = computed(() => {
-  return ((isUserInput.value && firsUserInput.value) || showUserInput.value) && props.type !== 'log'
+  return (
+    (((isUserInput.value || isAPIInput.value) && firsUserInput.value) || showUserInput.value) &&
+    props.type !== 'log'
+  )
 })
 watch(
   () => props.chatId,
@@ -172,10 +154,14 @@ watch(
       firsUserInput.value = false
     } else {
       chartOpenId.value = ''
-      firsUserInput.value = true
+      if (isUserInput.value) {
+        firsUserInput.value = true
+      } else if (props.type == 'debug-ai-chat' && isAPIInput.value) {
+        firsUserInput.value = true
+      }
     }
   },
-  { deep: true }
+  { deep: true, immediate: true },
 )
 
 watch(
@@ -183,7 +169,7 @@ watch(
   () => {
     chartOpenId.value = ''
   },
-  { deep: true }
+  { deep: true },
 )
 
 watch(
@@ -192,8 +178,8 @@ watch(
     chatList.value = value ? value : []
   },
   {
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 
 const toggleUserInput = () => {
@@ -216,29 +202,57 @@ function UserFormCancel() {
   userFormRef.value?.render(form_data.value)
   showUserInput.value = false
 }
-const checkInputParam = () => {
-  return userFormRef.value?.checkInputParam() || false
+
+const validate = () => {
+  return userFormRef.value?.validate() || Promise.reject(false)
 }
 
-function sendMessage(val: string, other_params_data?: any, chat?: chatType) {
+function sendMessage(val: string, other_params_data?: any, chat?: chatType): Promise<boolean> {
   if (isUserInput.value) {
-    if (!userFormRef.value?.checkInputParam()) {
-      showUserInput.value = true
-      return
+    if (userFormRef.value) {
+      return userFormRef.value
+        ?.validate()
+        .then((ok) => {
+          let userFormData = accessToken
+            ? JSON.parse(localStorage.getItem(`${accessToken}userForm`) || '{}')
+            : {}
+          const newData = Object.keys(form_data.value).reduce((result: any, key: string) => {
+            result[key] = Object.prototype.hasOwnProperty.call(userFormData, key)
+              ? userFormData[key]
+              : form_data.value[key]
+            return result
+          }, {})
+          if (accessToken) {
+            localStorage.setItem(`${accessToken}userForm`, JSON.stringify(newData))
+          }
+
+          showUserInput.value = false
+
+          if (!loading.value && props.applicationDetails?.name) {
+            handleDebounceClick(val, other_params_data, chat)
+            return true
+          }
+          throw 'err: no send'
+        })
+        .catch((e) => {
+          if (isAPIInput.value && props.type !== 'debug-ai-chat') {
+            showUserInput.value = false
+          } else {
+            showUserInput.value = true
+          }
+
+          return false
+        })
     } else {
-      let userFormData = JSON.parse(localStorage.getItem(`${accessToken}userForm`) || '{}')
-      const newData = Object.keys(form_data.value).reduce((result: any, key: string) => {
-        result[key] = Object.prototype.hasOwnProperty.call(userFormData, key)
-          ? userFormData[key]
-          : form_data.value[key]
-        return result
-      }, {})
-      localStorage.setItem(`${accessToken}userForm`, JSON.stringify(newData))
-      showUserInput.value = false
+      return Promise.reject(false)
     }
-  }
-  if (!loading.value && props.applicationDetails?.name) {
-    handleDebounceClick(val, other_params_data, chat)
+  } else {
+    showUserInput.value = false
+    if (!loading.value && props.applicationDetails?.name) {
+      handleDebounceClick(val, other_params_data, chat)
+      return Promise.resolve(true)
+    }
+    return Promise.reject(false)
   }
 }
 
@@ -251,39 +265,67 @@ const handleDebounceClick = debounce((val, other_params_data?: any, chat?: chatT
  */
 const openChatId: () => Promise<string> = () => {
   const obj = props.applicationDetails
-  if (props.appId) {
-    return applicationApi
-      .getChatOpen(props.appId)
-      .then((res) => {
-        chartOpenId.value = res.data
-        return res.data
-      })
-      .catch((res) => {
-        if (res.response.status === 403) {
-          return application.asyncAppAuthentication(accessToken).then(() => {
-            return openChatId()
-          })
-        }
-        return Promise.reject(res)
-      })
+  return getOpenChatAPI()(obj.id)
+    .then((res) => {
+      chartOpenId.value = res.data
+      return res.data
+    })
+    .catch((res) => {
+      return Promise.reject(res)
+    })
+}
+
+const getChatMessageAPI = () => {
+  if (props.type === 'debug-ai-chat') {
+    return applicationApi.chat
   } else {
-    if (isWorkFlow(obj.type)) {
-      console.log(obj)
-      const submitObj = {
-        work_flow: obj.work_flow,
-        user_id: obj.user
-      }
-      return applicationApi.postWorkflowChatOpen(submitObj).then((res) => {
-        chartOpenId.value = res.data
-        return res.data
-      })
+    return chatAPI.chat
+  }
+}
+const getOpenChatAPI = () => {
+  if (props.type === 'debug-ai-chat') {
+    if (route.path.includes('resource-management')) {
+      return SystemResourceManagementApplicationAPI.open
     } else {
-      return applicationApi.postChatOpen(obj).then((res) => {
-        chartOpenId.value = res.data
-        return res.data
-      })
+      return applicationApi.open
+    }
+  } else {
+    return (a?: string, loading?: Ref<boolean>) => {
+      return chatAPI.open(loading)
     }
   }
+}
+
+const getChatRecordDetailsAPI = (row: any) => {
+  if (row.record_id) {
+    if (props.type === 'debug-ai-chat') {
+      if (route.path.includes('resource-management')) {
+        return syetrmResourceManagementChatLogApi
+          .getChatRecordDetails(id || props.appId, row.chat_id, row.record_id, loading)
+      } else {
+        return chatLogApi
+          .getChatRecordDetails(id || props.appId, row.chat_id, row.record_id, loading)
+      }
+    } else {
+      return chatAPI.getChatRecord(row.chat_id, row.record_id, loading)
+    }
+  }
+  return Promise.reject("404")
+}
+/**
+ * 获取对话详情
+ * @param row
+ */
+function getSourceDetail(row: any) {
+  return getChatRecordDetailsAPI(row).then((res) => {
+    const exclude_keys = ['answer_text', 'id', 'answer_text_list']
+    Object.keys(res.data).forEach((key) => {
+      if (!exclude_keys.includes(key)) {
+        row[key] = res.data[key]
+      }
+    })
+  })
+
 }
 /**
  * 对话
@@ -405,8 +447,10 @@ function chatMessage(chat?: any, problem?: string, re_chat?: boolean, other_para
             ? other_params_data.document_list
             : [],
         audio_list:
-          other_params_data && other_params_data.audio_list ? other_params_data.audio_list : []
-      }
+          other_params_data && other_params_data.audio_list ? other_params_data.audio_list : [],
+        other_list:
+          other_params_data && other_params_data.other_list ? other_params_data.other_list : [],
+      },
     })
     chatList.value.push(chat)
     ChatManagement.addChatRecord(chat, 50, loading)
@@ -428,27 +472,18 @@ function chatMessage(chat?: any, problem?: string, re_chat?: boolean, other_para
   } else {
     const obj = {
       message: chat.problem_text,
+      stream: true,
       re_chat: re_chat || false,
       ...other_params_data,
       form_data: {
         ...form_data.value,
-        ...api_form_data.value
-      }
+        ...api_form_data.value,
+      },
     }
     // 对话
-    applicationApi
-      .postChatMessage(chartOpenId.value, obj)
+    getChatMessageAPI()(chartOpenId.value, obj)
       .then((response) => {
-        if (response.status === 401) {
-          application
-            .asyncAppAuthentication(accessToken)
-            .then(() => {
-              chatMessage(chat, problem)
-            })
-            .catch(() => {
-              errorWrite(chat)
-            })
-        } else if (response.status === 460) {
+        if (response.status === 460) {
           return Promise.reject(t('chat.tip.errorIdentifyMessage'))
         } else if (response.status === 461) {
           return Promise.reject(t('chat.tip.errorLimitMessage'))
@@ -462,7 +497,7 @@ function chatMessage(chat?: any, problem?: string, re_chat?: boolean, other_para
           const write = getWrite(
             chat,
             reader,
-            response.headers.get('Content-Type') !== 'application/json'
+            response.headers.get('Content-Type') !== 'application/json',
           )
           return reader.read().then(write)
         }
@@ -471,7 +506,16 @@ function chatMessage(chat?: any, problem?: string, re_chat?: boolean, other_para
         if (props.chatId === 'new') {
           emit('refresh', chartOpenId.value)
         }
-        return (id || props.applicationDetails?.show_source) && getSourceDetail(chat)
+        if (props.type === 'debug-ai-chat') {
+          getSourceDetail(chat)
+        } else {
+          if (
+            props.applicationDetails &&
+            (props.applicationDetails.show_exec || props.applicationDetails.show_source)
+          ) {
+            getSourceDetail(chat)
+          }
+        }
       })
       .finally(() => {
         ChatManagement.close(chat.id)
@@ -480,22 +524,6 @@ function chatMessage(chat?: any, problem?: string, re_chat?: boolean, other_para
         errorWrite(chat, e + '')
       })
   }
-}
-
-/**
- * 获取对话详情
- * @param row
- */
-function getSourceDetail(row: any) {
-  logApi.getRecordDetail(id || props.appId, row.chat_id, row.record_id, loading).then((res) => {
-    const exclude_keys = ['answer_text', 'id', 'answer_text_list']
-    Object.keys(res.data).forEach((key) => {
-      if (!exclude_keys.includes(key)) {
-        row[key] = res.data[key]
-      }
-    })
-  })
-  return true
 }
 
 /**
@@ -573,37 +601,50 @@ watch(
   () => {
     handleScroll()
   },
-  { deep: true, immediate: true }
+  { deep: true, immediate: true },
 )
 
 defineExpose({
-  setScrollBottom
+  setScrollBottom,
 })
 </script>
 <style lang="scss">
-@import './index.scss';
+@use './index.scss';
+
 .firstUserInput {
   height: 100%;
   display: flex;
   justify-content: center;
   overflow: auto;
+
   .user-form-container {
     max-width: 70%;
   }
 }
+
 .debug-ai-chat {
   .user-form-container {
     max-width: 100%;
   }
 }
+
 .popperUserInput {
   position: absolute;
   z-index: 999;
-  right: 50px;
-  bottom: 0;
+  left: 0;
+  bottom: 50px;
   width: calc(100% - 50px);
   max-width: 400px;
 }
+
+.video-stop-button {
+  box-shadow: 0px 6px 24px 0px rgba(31, 35, 41, 0.08);
+
+  &:hover {
+    background: #ffffff;
+  }
+}
+
 @media only screen and (max-width: 768px) {
   .firstUserInput {
     .user-form-container {

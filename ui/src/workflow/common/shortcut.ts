@@ -1,7 +1,7 @@
 import type LogicFlow from '@logicflow/core'
 import { type GraphModel } from '@logicflow/core'
 import { MsgSuccess, MsgError, MsgConfirm } from '@/utils/message'
-import { WorkflowType } from '@/enums/workflow'
+import { WorkflowType } from '@/enums/application'
 import { t } from '@/locales'
 let selected: any | null = null
 
@@ -101,7 +101,7 @@ export function initDefaultShortcut(lf: LogicFlow, graph: GraphModel) {
     }
     MsgConfirm(t('common.tip'), t('views.applicationWorkflow.delete.confirmTitle'), {
       confirmButtonText: t('common.confirm'),
-      confirmButtonClass: 'danger'
+      confirmButtonClass: 'color-danger'
     }).then(() => {
       if (!keyboardOptions?.enabled) return true
       if (graph.textEditElement) return true

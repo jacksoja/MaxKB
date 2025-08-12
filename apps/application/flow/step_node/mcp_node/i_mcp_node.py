@@ -2,24 +2,23 @@
 
 from typing import Type
 
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from application.flow.i_step_node import INode, NodeResult
-from common.util.field_message import ErrMessage
-from django.utils.translation import gettext_lazy as _
 
 
 class McpNodeSerializer(serializers.Serializer):
     mcp_servers = serializers.JSONField(required=True,
-                                        error_messages=ErrMessage.char(_("Mcp servers")))
+                                        label=_("Mcp servers"))
 
     mcp_server = serializers.CharField(required=True,
-                                       error_messages=ErrMessage.char(_("Mcp server")))
+                                       label=_("Mcp server"))
 
-    mcp_tool = serializers.CharField(required=True, error_messages=ErrMessage.char(_("Mcp tool")))
+    mcp_tool = serializers.CharField(required=True, label=_("Mcp tool"))
 
     tool_params = serializers.DictField(required=True,
-                                        error_messages=ErrMessage.char(_("Tool parameters")))
+                                        label=_("Tool parameters"))
 
 
 class IMcpNode(INode):

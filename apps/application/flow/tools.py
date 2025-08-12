@@ -13,7 +13,7 @@ from django.http import StreamingHttpResponse
 from langchain_core.messages import BaseMessageChunk, BaseMessage
 
 from application.flow.i_step_node import WorkFlowPostHandler
-from common.response import result
+from common.result import result
 
 
 class Reasoning:
